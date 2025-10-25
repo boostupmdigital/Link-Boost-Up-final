@@ -2,7 +2,7 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 
 //Linktree Jefa
-import LinktreeJefa from "./components/LinktreeJefa/Linktree";
+import BoostUp from "./components/BoostUp/BoostUp";
 
 
 
@@ -14,7 +14,7 @@ const App = () => {
       //Linktree enlaces
         path="/enlaces"
         element={
-            <LinktreeJefa />
+            <BoostUp />
         }
       />
       
