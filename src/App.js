@@ -1,8 +1,9 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
-//Linktree Jefa
 import BoostUp from "./components/BoostUp/BoostUp";
+import Vergel from "./components/VergelEstacion/Vergel";
+import AvitViajes from "./components/AvitViajes/AvitViajes";
 
 
 
@@ -15,6 +16,21 @@ const App = () => {
         path="/boostup"
         element={
             <BoostUp />
+        }
+      />
+      <Route
+      //Linktree enlaces
+        path="/vergel-estacion"
+        element={
+            <Vergel />
+        }
+      />
+
+      <Route
+      //Linktree enlaces
+        path="/avit-viajes"
+        element={
+            <AvitViajes />
         }
       />
       
