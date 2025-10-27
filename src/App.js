@@ -12,7 +12,7 @@ const App = () => {
       
       <Route
       //Linktree enlaces
-        path="/links"
+        path="/enlaces"
         element={
             <BoostUp />
         }
