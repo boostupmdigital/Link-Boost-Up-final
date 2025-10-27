@@ -22,7 +22,7 @@ export const Links = [
     title: "PEDIDOS YA",
     label: "Hacenos tu pedido ahora!",
     background: "red-900",
-    url: "https://www.pedidosya.com.ar/restaurantes/cordoba/el-vergel-cofico-34cc9899-5440-4ce8-947a-a21a8fbb077a-menus",
+    url: "https://www.pedidosya.com.ar/restaurantes/cordoba/el-vergel-cofico-34cc9899-5440-4ce8-947a-a21a8fbb077a-menu",
   },
  
 ];

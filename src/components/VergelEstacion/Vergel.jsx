@@ -8,7 +8,7 @@ const Vergel = () => {
       <div className="w-screen">
         <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6 py-6 text-center">
           <div className="w-60 p-3 flex items-center justify-center">
-            <img src={Logo} alt="BoostUp Logo" className="" />
+            <img src={Logo} alt="El Vergel, La Estación" className="" />
           </div>
           <h1 className="text-2xl font-bold italic text-black mb-2 mt-4">
            Los mejores sabores artesanales
