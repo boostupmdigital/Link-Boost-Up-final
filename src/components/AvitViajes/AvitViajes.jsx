@@ -49,9 +49,9 @@ const AvitViajes = () => {
             })}
           </div>
 
-          <div className="w-full max-w-md flex flex-col gap-4 border border-white p-3 shadow-2xl">
+          <div className="w-full max-w-md flex flex-col gap-4 border border-white p-2 shadow-2xl">
             <p className="text-orange-600 text-xl">
-              Hacemos realidad el viaje de tus sueños.
+              Hacé realidad el viaje de tus sueños!
               <br />
               <spam className="text-white text-xl italic">
                 Vacaciones familiares ?
@@ -60,7 +60,9 @@ const AvitViajes = () => {
                 <br />
                 ✈✈✈✈
                 <br />
-                Lo organizamos todo... ¡al mejor precio!
+                Lo organizamos todo... 
+                <br />
+                ¡al mejor precio!
                 <br />
               </spam>
               Tu próxima aventura comienza aquí.
