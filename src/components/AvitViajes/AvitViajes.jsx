@@ -7,7 +7,7 @@ const AvitViajes = () => {
   return (
     <React.Fragment>
       <div className="w-screen">
-        <div className="min-h-screen flex flex-col items-center justify-center bg-cyan-800 px-6 py-6 text-center">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-cyan-800 px-6 py-4 text-center">
           <div className="w-48 h-48 p-3 rounded-full shadow-xl flex items-center justify-center">
             <img src={Logo} alt="BoostUp Logo" className="" />
           </div>
