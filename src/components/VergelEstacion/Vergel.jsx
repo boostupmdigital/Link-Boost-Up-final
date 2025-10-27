@@ -1,7 +1,7 @@
 import React from "react";
 import { Links, Redes } from "./LinksData.js";
 import Logo from "../../assets/Image/vergel.png";
-import Boostup from "../../assets/Image/boostup.png";
+import Boostup from "../../assets/Image/boostup-negro.png";
 
 const Vergel = () => {
   return (
