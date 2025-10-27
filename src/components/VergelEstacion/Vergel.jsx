@@ -1,12 +1,13 @@
 import React from "react";
 import { Links, Redes } from "./LinksData.js";
 import Logo from "../../assets/Image/vergel.png";
+import Boostup from "../../assets/Image/boostup.png";
 
 const Vergel = () => {
   return (
     <React.Fragment>
       <div className="w-screen">
-        <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6 py-6 text-center">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6 py-4 text-center">
           <div className="w-60 p-3 flex items-center justify-center">
             <img src={Logo} alt="El Vergel, La Estación" className="" />
           </div>
@@ -45,16 +46,14 @@ const Vergel = () => {
               </a>
             ))}
           </div>
-          {/* <p className="text-sm text-pink-300 mt-6">
-            Si deseas un MENÚ DE ENLACES como éste  
-            <br />
-            <a href="https://jefa-web.com.ar/contactame" className="underline">
-            CONTACTAME
-            </a>
-            </p> */}
-           
+          <div className="w-20 p-3 flex items-center justify-center">
+                      <a href="https://www.boostup-marketingdigital.com/">
+                      <img src={Boostup} alt="BoostUp Logo" className="" />
+                      </a>
+                    </div>
         </div>
       </div>
+      
     </React.Fragment>
   );
 };
