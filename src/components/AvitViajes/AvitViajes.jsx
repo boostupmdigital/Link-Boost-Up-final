@@ -10,9 +10,9 @@ const AvitViajes = () => {
           <div className="w-48 h-48 p-3 rounded-full shadow-xl flex items-center justify-center">
             <img src={Logo} alt="BoostUp Logo" className="" />
           </div>
-          <h1 className="text-3xl font-bold text-orange-500 mb-4 mt-8">
+          <h1 className="text-3xl font-bold text-orange-500 mb-4 mt-4">
             AVIT
-            <spam className="text-3xl font-bold italic text-orange-100 ml-2">
+            <spam className="text-3xl font-bold italic text-white ml-2">
              VIAJES
 
             </spam>
@@ -21,7 +21,7 @@ const AvitViajes = () => {
            Agencia de Turismo ✈ Worldwide Travel
           </h2>
 
-         <div className="flex flex-row gap-4 my-10">
+         <div className="flex flex-row gap-4 my-8">
   {Redes.map((Red, index) => {
     // Si es mailto usamos <a> normal
     if (Red.key === "email") {
@@ -51,10 +51,10 @@ const AvitViajes = () => {
 
 
           <div className="w-full max-w-md flex flex-col gap-4 border border-white p-3 shadow-2xl">
-            <p className="text-orange-600 text-2xl">
+            <p className="text-orange-600 text-xl">
               Hacemos realidad el viaje de tus sueños. 
              <br />
-             <spam className="text-white text-2xl italic">
+             <spam className="text-white text-xl italic">
               Vacaciones familiares ? 
               <br />
               Una escapada romántica?
