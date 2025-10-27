@@ -2,10 +2,8 @@ import {
   FaWhatsapp,
   FaInstagram,
   FaFacebook,
-  FaTiktok,
-  FaYoutube
+  FaMailBulk
 } from "react-icons/fa";
-import { FaLinkedin } from "react-icons/fa6";
 
 export const Links = [
   {
@@ -38,26 +36,22 @@ export const Redes = [
     {
         key: "whatsapp",
         img: <FaWhatsapp />,
-        url: "https://wa.me/+5493515901398",
+        url: "https://wa.me/+529841003368",
     },
     {
         key: "instagram",
         img: <FaInstagram />,
-        url: "https://www.instagram.com/boostup.mkdigital",
+        url: "https://www.instagram.com/avit_viajes",
     },
-    {
-      key: "tiktok",
-      img: <FaTiktok />,
-      url: "https://www.tiktok.com/@boostup.mktdigital",
-    },
-    {
-      key: "youtube",
-      img: <FaYoutube />,
-      url: "https://www.youtube.com/channel/UCHA5LQ3gPxCz-3rzMtxGc8Q",
-    },
+  
     {
         key: "facebook",
         img: <FaFacebook />,
-        url: "https://www.facebook.com/boostup.mkdigital",
+        url: "https://www.facebook.com/avitviajes",
+    },
+     {
+        key: "email",
+        img: <FaMailBulk />,
+        url: "mailto:veronica@avitviajes.com",
     },
   ]
