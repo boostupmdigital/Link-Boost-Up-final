@@ -4,7 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import BoostUp from "./components/BoostUp/BoostUp";
 import Vergel from "./components/VergelEstacion/Vergel";
 import AvitViajes from "./components/AvitViajes/AvitViajes";
-import OneService from "./components/OneService/oneService";
+import OneServiceSrl from "./components/OneServiceSrl/OneServiceSrl";
 
 
 
@@ -39,7 +39,7 @@ const App = () => {
       //oneServices enlaces
         path="/oneservice"
         element={
-            <OneService />
+            <OneServiceSrl />
         }
       />
       
