@@ -1,7 +1,7 @@
 import React from "react";
 import { Links, Redes } from "./LinksData.js";
 import Logo from "../../assets/Image/logo-oneservice.png";
-
+import Boostup from "../../assets/Image/boostup-negro.png";
 
 const OneServiceSrl = () => {
   return (
@@ -11,7 +11,7 @@ const OneServiceSrl = () => {
           <div className="w-100  p-3 shadow-lg flex items-center justify-center">
             <img src={Logo} alt="BoostUp Logo" className="rounded-xl" />
           </div>
-          
+
           <div className="flex flex-row gap-4 my-10">
             {Redes.map((Red, index) => (
               <a
@@ -40,8 +40,11 @@ const OneServiceSrl = () => {
               </a>
             ))}
           </div>
-      
-           
+          <div className="w-20 p-3 flex items-center justify-center">
+                                      <a href="https://www.boostup-marketingdigital.com/">
+                                      <img src={Boostup} alt="BoostUp Logo" className="" />
+                                      </a>
+                                    </div>
         </div>
       </div>
     </React.Fragment>

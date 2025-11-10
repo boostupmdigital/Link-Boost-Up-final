@@ -5,6 +5,7 @@ import BoostUp from "./components/BoostUp/BoostUp";
 import Vergel from "./components/VergelEstacion/Vergel";
 import AvitViajes from "./components/AvitViajes/AvitViajes";
 import OneServiceSrl from "./components/OneServiceSrl/OneServiceSrl";
+import Acquasole from "./components/Acquasole/Acquasole";
 
 
 
@@ -40,6 +41,14 @@ const App = () => {
         path="/oneservice"
         element={
             <OneServiceSrl />
+        }
+      />
+
+      <Route
+      //oneServices enlaces
+        path="/acquasole"
+        element={
+            <Acquasole />
         }
       />
       
