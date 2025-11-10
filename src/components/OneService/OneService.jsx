@@ -40,13 +40,7 @@ const OneService = () => {
               </a>
             ))}
           </div>
-          {/* <p className="text-sm text-pink-300 mt-6">
-            Si deseas un MENÚ DE ENLACES como éste  
-            <br />
-            <a href="https://jefa-web.com.ar/contactame" className="underline">
-            CONTACTAME
-            </a>
-            </p> */}
+      
            
         </div>
       </div>
