@@ -3,7 +3,7 @@ import { Links, Redes } from "./LinksData.js";
 import Logo from "../../assets/Image/logo-oneservice.png";
 
 
-const OneService = () => {
+const oneService = () => {
   return (
     <React.Fragment>
       <div className="w-screen">
@@ -48,4 +48,4 @@ const OneService = () => {
   );
 };
 
-export default OneService;
+export default oneService;

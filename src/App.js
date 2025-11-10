@@ -4,7 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import BoostUp from "./components/BoostUp/BoostUp";
 import Vergel from "./components/VergelEstacion/Vergel";
 import AvitViajes from "./components/AvitViajes/AvitViajes";
-import OneService from "./components/OneService/OneService";
+import OneService from "./components/OneService/oneService";
 
 
 
