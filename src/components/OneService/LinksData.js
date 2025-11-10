@@ -3,9 +3,7 @@ import {
   FaInstagram,
   FaFacebook,
   FaTiktok,
-  FaYoutube
 } from "react-icons/fa";
-import { FaLinkedin } from "react-icons/fa6";
 
 export const Links = [
   {
