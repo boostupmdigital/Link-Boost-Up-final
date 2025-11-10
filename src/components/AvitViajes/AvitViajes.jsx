@@ -1,5 +1,5 @@
 import React from "react";
-import { Links, Redes } from "./LinksData.js";
+import { Redes } from "./LinksData.js";
 import Logo from "../../assets/Image/avitViajes.png";
 import Boostup from "../../assets/Image/boostup.png"
 
