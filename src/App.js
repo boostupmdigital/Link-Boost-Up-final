@@ -4,6 +4,7 @@ import { Routes, Route } from "react-router-dom";
 import BoostUp from "./components/BoostUp/BoostUp";
 import Vergel from "./components/VergelEstacion/Vergel";
 import AvitViajes from "./components/AvitViajes/AvitViajes";
+import OneService from "./components/OneService/OneService";
 
 
 
@@ -12,14 +13,14 @@ const App = () => {
     <Routes>
       
       <Route
-      //Linktree enlaces
+      //BoostUp enlaces
         path="/boostup"
         element={
             <BoostUp />
         }
       />
       <Route
-      //Linktree enlaces
+      //Vergel enlaces
         path="/vergel-estacion"
         element={
             <Vergel />
@@ -27,10 +28,18 @@ const App = () => {
       />
 
       <Route
-      //Linktree enlaces
+      //Avit enlaces
         path="/avit-viajes"
         element={
             <AvitViajes />
+        }
+      />
+
+      <Route
+      //oneServices enlaces
+        path="/oneservice"
+        element={
+            <OneService />
         }
       />
       
