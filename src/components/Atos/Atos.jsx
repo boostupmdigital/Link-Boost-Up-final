@@ -8,7 +8,7 @@ const Atos = () => {
   return (
     <React.Fragment>
       <div className="w-screen">
-        <div className="min-h-screen flex flex-col items-center justify-center bg-green-600 px-6 py-6 text-center">
+        <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6 py-6 text-center">
           <div className="max-w-screen p-3 flex items-center justify-center">
             <img src={Logo} alt="BoostUp Logo" className="" />
           </div>
