@@ -1,6 +1,6 @@
 import React from "react";
 import { Links, Redes } from "./LinksData.js";
-import Logo from "../../assets/Image/logo-acquasole.png";
+import Logo from "../../assets/Image/logo-para-fondo.png";
 import Boostup from "../../assets/Image/boostup-negro.png";
 
 
