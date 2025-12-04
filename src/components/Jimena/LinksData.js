@@ -26,7 +26,7 @@ export const Redes = [
     {
         key: "whatsapp",
         img: <FaWhatsapp />,
-        url: "https://wa.me/+5493516528247",
+        url: "https://wa.me/+5491164109920",
     },
     {
         key: "instagram",
