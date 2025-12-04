@@ -8,15 +8,15 @@ export const Links = [
    
   {
     title: "Tienda online",
-    label: "Energía renovable al alcance de un clic",
+    label: "Cada pincelada una historia...",
     background: "fuchsia-900",
-    url: "https://www.acquasoletienda.com.ar/",
+    url: "https://pinturaschamena.com.ar/",
   },
    {
     title: "Dónde estamos...",
-    label: "Ruta E53 - Km22 | Río Ceballos, Córdoba. Ver mapa...",
+    label: "Av.3 Nro.381 - Paseo de los Artesanos- Villa Gesell- BsAs. Ver mapa...",
     background: "red-900",
-    url: "https://maps.app.goo.gl/6HE1mRX5r9ZCFzEJ8",
+    url: "https://maps.app.goo.gl/qsMEdkmHAavC8jMf6",
   },
 ];
 
@@ -24,16 +24,16 @@ export const Redes = [
     {
         key: "whatsapp",
         img: <FaWhatsapp />,
-        url: "https://wa.me/+5493516528247",
+        url: "https://wa.me/+5492255604885",
     },
     {
         key: "instagram",
         img: <FaInstagram />,
-        url: "https://www.instagram.com/_acquasole_/",
+        url: "https://www.instagram.com/remeraspintadaschamena/",
     },
     {
         key: "facebook",
         img: <FaFacebook />,
-        url: "https://www.facebook.com/Hola.Acquasole",
+        url: "https://www.facebook.com/pinturaschamena",
     },
   ]
