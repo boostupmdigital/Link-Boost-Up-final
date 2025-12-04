@@ -6,17 +6,12 @@ import {
 
 export const Links = [
    
-  {
-    title: "Tienda online",
-    label: "Energía renovable al alcance de un clic",
-    background: "fuchsia-900",
-    url: "https://www.acquasoletienda.com.ar/",
-  },
+ 
    {
     title: "Dónde estamos...",
-    label: "Ruta E53 - Km22 | Río Ceballos, Córdoba. Ver mapa...",
+    label: "Gral. Paz 1921 PB Local 1, Córdoba. Ver mapa...",
     background: "red-900",
-    url: "https://maps.app.goo.gl/6HE1mRX5r9ZCFzEJ8",
+    url: "https://maps.app.goo.gl/767RSrPxsWKvFGxi9",
   },
 ];
 
@@ -24,16 +19,16 @@ export const Redes = [
     {
         key: "whatsapp",
         img: <FaWhatsapp />,
-        url: "https://wa.me/+5493516528247",
+        url: "https://wa.me/+5493515410708",
     },
     {
         key: "instagram",
         img: <FaInstagram />,
-        url: "https://www.instagram.com/_acquasole_/",
+        url: "https://www.instagram.com/viajesfinder//",
     },
     {
         key: "facebook",
         img: <FaFacebook />,
-        url: "https://www.facebook.com/Hola.Acquasole",
+        url: "https://www.facebook.com/viajesfinder/",
     },
   ]
