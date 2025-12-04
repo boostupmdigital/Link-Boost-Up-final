@@ -2,21 +2,23 @@ import {
   FaWhatsapp,
   FaInstagram,
   FaFacebook,
+  FaTiktok,
+  FaPinterest
 } from "react-icons/fa";
 
 export const Links = [
    
   {
     title: "Tienda online",
-    label: "Energía renovable al alcance de un clic",
+    label: "Piezas únicas...",
     background: "fuchsia-900",
-    url: "https://www.acquasoletienda.com.ar/",
+    url: "https://www.jimenapalacios.ar/",
   },
    {
-    title: "Dónde estamos...",
-    label: "Ruta E53 - Km22 | Río Ceballos, Córdoba. Ver mapa...",
+    title: "Blog Jime",
+    label: "Novedades, experiencias y vivencias.",
     background: "red-900",
-    url: "https://maps.app.goo.gl/6HE1mRX5r9ZCFzEJ8",
+    url: "https://www.jimenapalacios.ar/blog/",
   },
 ];
 
@@ -29,11 +31,21 @@ export const Redes = [
     {
         key: "instagram",
         img: <FaInstagram />,
-        url: "https://www.instagram.com/_acquasole_/",
+        url: "instagram.com/Jimenapalaciosestudio/",
     },
     {
         key: "facebook",
         img: <FaFacebook />,
-        url: "https://www.facebook.com/Hola.Acquasole",
+        url: "https://www.facebook.com/jimepalaciosestudio/",
+    },
+    {
+        key: "tiktok",
+        img: <FaTiktok />,
+        url: "https://www.tiktok.com/@JIMENAPALACIOSESTUDIO",
+    },
+    {
+        key: "pinterest",
+        img: <FaPinterest />,
+        url: "https://ar.pinterest.com/jimenapalaciosestudio/",
     },
   ]
