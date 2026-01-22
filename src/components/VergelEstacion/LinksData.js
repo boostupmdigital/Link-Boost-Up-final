@@ -16,7 +16,7 @@ export const Links = [
     title: "Nuestra Carta",
     label: "Mirá nuestro menú con precios actualizados",
     background: "amber-600",
-    url: "https://drive.google.com/file/d/1Vr1Y5o6FO6hs4lVRrE-XPrxggxTsL2jZ/view?usp=sharing",
+    url: "https://docs.google.com/presentation/d/1dtdqTY8tEvQWEYkGlx7h_ZugSIfYaZk0lUcJBlV6kak/edit?usp=sharing",
   },
   {
     title: "PEDIDOS YA",
