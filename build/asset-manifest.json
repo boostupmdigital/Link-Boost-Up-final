@@ -1,0 +1,25 @@
+{
+  "files": {
+    "main.css": "/static/css/main.9838b2d0.css",
+    "main.js": "/static/js/main.ff1431be.js",
+    "static/media/vergel.png": "/static/media/vergel.0943e19b523fd6391bc6.png",
+    "static/media/logo-acquasole.png": "/static/media/logo-acquasole.24d8a820b607351e3d03.png",
+    "static/media/logo-para-fondo.png": "/static/media/logo-para-fondo.622d3143f827a7fd442f.png",
+    "static/media/boostup.png": "/static/media/boostup.927a646940dbf3f7fadf.png",
+    "static/media/avitViajes.png": "/static/media/avitViajes.1b3dc12942376c2007b0.png",
+    "static/media/boostup-negro.png": "/static/media/boostup-negro.d6567b6567434a7796aa.png",
+    "static/media/logo-sublime-circulo.jpg": "/static/media/logo-sublime-circulo.7c1a35574c73eb186394.jpg",
+    "static/media/logo-jimena.webp": "/static/media/logo-jimena.4ad1273048e271e00953.webp",
+    "static/media/logo-solenar-circular.jpg": "/static/media/logo-solenar-circular.15622d5e56d59cdd6a0c.jpg",
+    "static/media/sigamos-creciendo-juntos.png": "/static/media/sigamos-creciendo-juntos.fbce65d470f2453924d8.png",
+    "static/media/logo-chamena.png": "/static/media/logo-chamena.a32728a1c7c7b7a39fcc.png",
+    "static/media/logo-finder.jpg": "/static/media/logo-finder.09b9c9982293e441ca66.jpg",
+    "index.html": "/index.html",
+    "main.9838b2d0.css.map": "/static/css/main.9838b2d0.css.map",
+    "main.ff1431be.js.map": "/static/js/main.ff1431be.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.9838b2d0.css",
+    "static/js/main.ff1431be.js"
+  ]
+}
