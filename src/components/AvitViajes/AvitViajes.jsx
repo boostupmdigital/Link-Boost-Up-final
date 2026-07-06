@@ -51,7 +51,7 @@ const AvitViajes = () => {
 
           <div className="w-full max-w-md flex flex-col gap-4 border border-white p-2 shadow-2xl">
             <p className="text-orange-600 text-xl">
-              Hacé realidad el viaje de tus sueños!
+              Haz realidad el viaje de tus sueños!
               <br />
               <spam className="text-white text-xl italic">
                 Vacaciones familiares ?

@@ -26,7 +26,7 @@ const Finder = () => {
               </a>
             ))}
           </div>
-
+          {/*
           <div className="w-full max-w-md flex flex-col gap-4">
             {Links.map((link, index) => (
               <a
@@ -40,6 +40,27 @@ const Finder = () => {
                 {link.label}
               </a>
             ))}
+          </div>
+              */}
+          
+          <div className="w-full max-w-md flex flex-col gap-4 border border-pink-500 p-2 shadow-2xl bg-cyan-600/10">
+            <p className="text-pink-500 text-xl">
+              Hacemos realidad el viaje de tus sueños!
+              <br />
+              <spam className="text-cyan-500 text-xl italic">
+                Vacaciones familiares ?
+                <br />
+                Una escapada romántica?
+                <br />
+                ✈✈✈✈
+                <br />
+                Lo organizamos todo... 
+                <br />
+                ¡al mejor precio!
+                <br />
+              </spam>
+              Tu próxima aventura comienza aquí.
+            </p>
           </div>
       <div className="w-20 p-3 flex items-center justify-center">
                             <a href="https://www.boostup-marketingdigital.com/">
