@@ -9,7 +9,7 @@ const Finder = () => {
     <React.Fragment>
       <div className="w-screen">
         <div className="min-h-screen flex flex-col items-center justify-center bg-white px-6 py-6 text-center">
-          <div className="w-70 p-3 flex items-center justify-center mb-10 rounded-full">
+          <div className="w-70 p-3 flex items-center justify-center mb-5 rounded-full">
             <img src={Logo} alt="Viajes Finder Logo" className="" />
           </div>
           
@@ -17,7 +17,7 @@ const Finder = () => {
             Agencia de Turismo ✈ Worldwide Travel
           </h2>
           
-          <div className="flex flex-row gap-4 mb-10">
+          <div className="flex flex-row gap-4 mb-10 mt-3">
             {Redes.map((Red, index) => (
               <a
                 key={index}
