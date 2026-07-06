@@ -12,12 +12,7 @@ const Finder = () => {
           <div className="w-70 p-3 flex items-center justify-center mb-10 rounded-full">
             <img src={Logo} alt="Viajes Finder Logo" className="" />
           </div>
-          <h1 className="text-3xl font-bold text-black mb-4 mt-4">
-            VIAJES
-            <spam className="text-3xl font-bold italic text-pink-500 ml-2">
-              FINDER
-            </spam>
-          </h1>
+          
           <h2 className="text-xl text-gray-800 ">
             Agencia de Turismo ✈ Worldwide Travel
           </h2>
