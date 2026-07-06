@@ -47,7 +47,7 @@ const Finder = () => {
             <p className="text-pink-500 text-xl">
               Hacemos realidad el viaje de tus sueños!
               <br />
-              <spam className="text-cyan-500 text-xl italic">
+              <spam className="text-cyan-600 text-xl italic">
                 Vacaciones familiares ?
                 <br />
                 Una escapada romántica?
