@@ -22,7 +22,7 @@ const BoostUp = () => {
                 href={Red.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="border border-gray-300 hover:border-pink-500 text-white hover:text-pink-600 font-medium text-2xl p-2 rounded-full shadow-sm hover:shadow-md transition"
+                className="border border-gray-300 hover:border-orange-500 text-white hover:text-orange-600 font-medium text-2xl p-2 rounded-full shadow-sm hover:shadow-md transition"
               >
                 {Red.img}
               </a>
@@ -36,7 +36,7 @@ const BoostUp = () => {
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`bg-${link.background} border border-gray-300 hover:border-orange-500 text-white hover:text-pink-600 font-medium py-3 px-4 rounded-xl shadow-sm hover:shadow-md transition`}
+                className={`bg-${link.background} border border-gray-300 hover:border-orange-500 text-white hover:text-orange-600 font-medium py-3 px-4 rounded-xl shadow-sm hover:shadow-md transition`}
               >
                 <h4 className="font-bold text-lg">{link.title}</h4>
                 {link.label}

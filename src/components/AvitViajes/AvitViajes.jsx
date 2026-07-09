@@ -9,7 +9,7 @@ const AvitViajes = () => {
       <div className="w-screen">
         <div className="min-h-screen flex flex-col items-center justify-center bg-cyan-800 px-6 py-4 text-center">
           <div className="w-48 h-48 p-3 rounded-full shadow-xl flex items-center justify-center">
-            <img src={Logo} alt="BoostUp Logo" className="" />
+            <img src={Logo} alt="Avit Logo" className="" />
           </div>
           <h1 className="text-3xl font-bold text-orange-500 mb-4 mt-4">
             AVIT

@@ -13,6 +13,8 @@ import Finder from "./components/Finder/Finder";
 import Tuprop from "./components/TuProp/Tuprop";
 import Chamena from "./components/Chamena/Chamena";
 import Sublime from "./components/Sublime/Sublime";
+import Jefaweb from "./components/JefaWeb/Jefaweb";
+import Home from "./components/Home/Home";
 
 
 
@@ -22,9 +24,23 @@ const App = () => {
       
       <Route
       //BoostUp enlaces
+        path="/"
+        element={
+            <Home />
+        }
+      />
+      <Route
+      //BoostUp enlaces
         path="/boostup"
         element={
             <BoostUp />
+        }
+      />
+      <Route
+      //Jefa web enlaces
+        path="/jefa"
+        element={
+            <Jefaweb />
         }
       />
       <Route

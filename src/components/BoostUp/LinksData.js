@@ -3,7 +3,8 @@ import {
   FaInstagram,
   FaFacebook,
   FaTiktok,
-  FaYoutube
+  FaYoutube,
+  FaMailBulk,
 } from "react-icons/fa";
 //import { FaLinkedin } from "react-icons/fa6";
 
@@ -38,7 +39,7 @@ export const Redes = [
     {
         key: "whatsapp",
         img: <FaWhatsapp />,
-        url: "https://wa.me/+5493515901398",
+        url: "https://wa.me/+5493513339431",
     },
     {
         key: "instagram",
@@ -60,4 +61,9 @@ export const Redes = [
         img: <FaFacebook />,
         url: "https://www.facebook.com/boostup.mkdigital",
     },
+    {
+        key: "email",
+        img: <FaMailBulk />,
+        url: "mailto:boostup.mdigital@gmail.com",
+    }
   ]
