@@ -14,6 +14,7 @@ import Tuprop from "./components/TuProp/Tuprop";
 import Chamena from "./components/Chamena/Chamena";
 import Sublime from "./components/Sublime/Sublime";
 import Jefaweb from "./components/JefaWeb/Jefaweb";
+import Garbo from "./components/Garbo/Garbo";
 import Home from "./components/Home/Home";
 
 
@@ -34,6 +35,13 @@ const App = () => {
         path="/boostup"
         element={
             <BoostUp />
+        }
+      />
+      <Route
+      //Garbo enlaces
+        path="/garbo"
+        element={
+            <Garbo />
         }
       />
       <Route

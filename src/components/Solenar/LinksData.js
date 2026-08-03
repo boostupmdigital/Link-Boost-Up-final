@@ -29,7 +29,7 @@ export const Redes = [
     {
         key: "instagram",
         img: <FaInstagram />,
-        url: "instagram.com/solenar.renovables/",
+        url: "https://www.instagram.com/solenar.renovables/",
     },
     {
         key: "facebook",
