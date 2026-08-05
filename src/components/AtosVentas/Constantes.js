@@ -25,19 +25,82 @@ export const PLANES = [
 export const MEDIOS_PAGO = [
   "Débito automático Tarjeta",
   "Débito por Homebanking",
+  "Pago Fácil / Rapipago",
   "Botón de pago SIRO",
   "Mercado Pago",
 ];
 
-/*
- * Reemplazar estos nombres por la lista real.
- * La opción "Otro" se agrega automáticamente en el select.
- */
-export const TECNICOS = [
-  "Técnico 1",
-  "Técnico 2",
-  "Técnico 3",
+
+export const TECNICOS_INFO = [
+  {
+    nombre: "Adrian Maidana",
+    servicios: ["Inalámbrico", "Fibra óptica"],
+    zonas: [
+      "Potrero de Garay",
+      "Villa Ciudad América",
+      "Río Los Espinillos",
+      "Anisacate",
+      "La Bolsa",
+      "Villa General Belgrano",
+      "Los Reartes",
+      "Capilla Vieja",
+    ],
+  },
+  {
+    nombre: "Federico",
+    servicios: ["Fibra óptica"],
+    zonas: [
+      "Río Los Espinillos",
+      "Potrero de Garay",
+    ],
+  },
+  {
+    nombre: "Maximiliano López",
+    servicios: ["Inalámbrico"],
+    zonas: [
+      "Córdoba",
+      "Zonas rurales de Calamuchita: Atos Pampa, Villa Berna, La Cumbrecita, etc.",
+    ],
+  },
+  {
+    nombre: "Pablo Ramirez",
+    servicios: ["Fibra óptica"],
+    zonas: [
+      "Villa Amancay",
+      "Amboy",
+      "San Ignacio",
+    ],
+  },
+  {
+    nombre: "Alberto Garcia",
+    servicios: ["Inalámbrico"],
+    zonas: [
+      "Santa Rosa",
+      "Villa Amancay",
+      "Amboy",
+      "San Ignacio",
+    ],
+  },
+  {
+    nombre: "Nahuel",
+    servicios: ["Inalámbrico", "Fibra óptica"],
+    zonas: [
+      "Yacanto",
+      "El Durazno",
+    ],
+  },
+  {
+    nombre: "Ivan Martinez",
+    servicios: ["Fibra óptica"],
+    zonas: [
+      "Córdoba Sur: Angelleli, Rivadavia, Nuestro Hogar 3, Solares del Sur, etc.",
+    ],
+  },
 ];
+
+export const TECNICOS = TECNICOS_INFO.map(
+  (tecnico) => tecnico.nombre,
+);
 
 export const INITIAL_FORM_DATA = {
   nombreApellido: "",

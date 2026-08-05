@@ -7,6 +7,7 @@ import {
   PLANES,
   MEDIOS_PAGO,
   TECNICOS,
+  TECNICOS_INFO,
   INITIAL_FORM_DATA,
   INPUT_CLASS_NAME,
   TEXTAREA_CLASS_NAME,
@@ -90,6 +91,14 @@ const AtosVentas = () => {
   const [successData, setSuccessData] = useState(null);
 
   const fechaMinima = useMemo(() => obtenerFechaLocalISO(), []);
+
+  const [showTechnicianInfo, setShowTechnicianInfo] = useState(false);
+
+  const tecnicoSeleccionadoInfo = useMemo(() => {
+    return TECNICOS_INFO.find(
+      (tecnico) => tecnico.nombre === formData.tecnicoAsignado,
+    );
+  }, [formData.tecnicoAsignado]);
 
   /*
    * Recuperar borrador pendiente.
@@ -264,18 +273,18 @@ const AtosVentas = () => {
   };
 
   const scrollAlInicio = () => {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
-};
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   const handleEnviar = async (event) => {
     event.preventDefault();
 
     setErrorMessage("");
     setSuccessData(null);
-    
+
     const validationError = validarFormulario();
 
     if (validationError) {
@@ -357,7 +366,7 @@ const AtosVentas = () => {
        */
       setFormData(INITIAL_FORM_DATA);
       localStorage.removeItem(STORAGE_KEY);
-scrollAlInicio();
+      scrollAlInicio();
     } catch (error) {
       console.error("Error al enviar solicitud:", error);
 
@@ -1076,6 +1085,49 @@ scrollAlInicio();
                     className={INPUT_CLASS_NAME}
                   />
                 </div>
+                <div className="rounded-lg border border-blue-200 bg-blue-50">
+                  <button
+                    type="button"
+                    onClick={() => setShowTechnicianInfo((current) => !current)}
+                    className="flex min-h-12 w-full items-center justify-between px-4 py-3 text-left"
+                  >
+                    <span className="text-sm font-semibold text-blue-900">
+                      Ver servicios y zonas de los técnicos
+                    </span>
+
+                    <span
+                      className={`text-lg text-blue-900 transition-transform ${
+                        showTechnicianInfo ? "rotate-180" : ""
+                      }`}
+                      aria-hidden="true"
+                    >
+                      ▾
+                    </span>
+                  </button>
+
+                  {showTechnicianInfo && (
+                    <div className="max-h-72 space-y-3 overflow-y-auto border-t border-blue-200 p-3">
+                      {TECNICOS_INFO.map((tecnico) => (
+                        <div
+                          key={tecnico.nombre}
+                          className="rounded-lg bg-white p-3 shadow-sm"
+                        >
+                          <h3 className="text-sm font-bold text-blue-900">
+                            {tecnico.nombre}
+                          </h3>
+
+                          <p className="mt-1 text-xs font-semibold text-orange-600">
+                            {tecnico.servicios.join(" · ")}
+                          </p>
+
+                          <p className="mt-2 text-xs leading-5 text-gray-700">
+                            {tecnico.zonas.join(" · ")}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
 
                 <div>
                   <FieldLabel htmlFor="tecnicoAsignado" required>
@@ -1102,6 +1154,21 @@ scrollAlInicio();
                     <option value="Otro">Otro</option>
                   </select>
                 </div>
+                {tecnicoSeleccionadoInfo && (
+                  <div className="mt-3 rounded-lg border border-green-200 bg-green-50 p-3">
+                    <p className="text-sm font-bold text-green-900">
+                      {tecnicoSeleccionadoInfo.nombre}
+                    </p>
+
+                    <p className="mt-1 text-xs font-semibold text-green-800">
+                      Servicios: {tecnicoSeleccionadoInfo.servicios.join(", ")}
+                    </p>
+
+                    <p className="mt-1 text-xs leading-5 text-gray-700">
+                      Zonas: {tecnicoSeleccionadoInfo.zonas.join(", ")}
+                    </p>
+                  </div>
+                )}
 
                 {formData.tecnicoAsignado === "Otro" && (
                   <div>
