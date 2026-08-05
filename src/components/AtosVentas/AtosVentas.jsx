@@ -1,5 +1,5 @@
-import React, {useEffect, useMemo, useState} from "react"
-import {jsPDF} from "jspdf";
+import React, { useEffect, useMemo, useState } from "react";
+import { jsPDF } from "jspdf";
 import {
   APP_SCRIPT_URL,
   WHATSAPP_PRUEBA,
@@ -15,8 +15,7 @@ import {
 import Logo from "../../assets/Image/logo-para-fondo.png";
 import Boostup from "../../assets/Image/boostup-negro.png";
 
-const normalizarEspacios = (valor = "") =>
-  valor.trim().replace(/\s+/g, " ");
+const normalizarEspacios = (valor = "") => valor.trim().replace(/\s+/g, " ");
 
 const obtenerFechaLocalISO = () => {
   const hoy = new Date();
@@ -76,8 +75,7 @@ const SectionTitle = ({ children }) => (
 );
 
 const AtosVentas = () => {
-
-const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -147,9 +145,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
     }
 
     if (name === "telefono") {
-      sanitizedValue = value
-        .replace(/[^0-9+\-() ]/g, "")
-        .slice(0, 14);
+      sanitizedValue = value.replace(/[^0-9+\-() ]/g, "").slice(0, 14);
     }
 
     if (name === "numero") {
@@ -162,10 +158,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
         [name]: sanitizedValue,
       };
 
-      if (
-        name === "tecnicoAsignado" &&
-        sanitizedValue !== "Otro"
-      ) {
+      if (name === "tecnicoAsignado" && sanitizedValue !== "Otro") {
         nextData.otroTecnico = "";
       }
 
@@ -191,16 +184,14 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
     }
 
     const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-      formData.email.trim()
+      formData.email.trim(),
     );
 
     if (!emailValido) {
       return "Ingresá una dirección de email válida.";
     }
 
-    const telefonoValido = /^[0-9+\-() ]{7,14}$/.test(
-      formData.telefono.trim()
-    );
+    const telefonoValido = /^[0-9+\-() ]{7,14}$/.test(formData.telefono.trim());
 
     if (!telefonoValido) {
       return (
@@ -244,17 +235,13 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
     calle: normalizarEspacios(formData.calle),
     numero: normalizarEspacios(formData.numero),
     barrio: normalizarEspacios(formData.barrio),
-    observacionesDomicilio: normalizarEspacios(
-      formData.observacionesDomicilio
-    ),
+    observacionesDomicilio: normalizarEspacios(formData.observacionesDomicilio),
 
     empresaActual: normalizarEspacios(formData.empresaActual),
     planSolicitado: formData.planSolicitado,
     medioPago: formData.medioPago,
     promocion: normalizarEspacios(formData.promocion),
-    observacionesPlan: normalizarEspacios(
-      formData.observacionesPlan
-    ),
+    observacionesPlan: normalizarEspacios(formData.observacionesPlan),
 
     fechaVisita: formData.fechaVisita,
     tecnico: tecnicoFinal,
@@ -276,34 +263,41 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
     localStorage.removeItem(STORAGE_KEY);
   };
 
+  const scrollAlInicio = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+};
+
   const handleEnviar = async (event) => {
     event.preventDefault();
 
     setErrorMessage("");
     setSuccessData(null);
-
+    
     const validationError = validarFormulario();
 
     if (validationError) {
       setErrorMessage(validationError);
+      scrollAlInicio();
       return;
     }
 
     if (!navigator.onLine) {
       setErrorMessage(
         "No hay conexión a internet. Podés descargar el PDF para " +
-          "conservar una copia de la solicitud."
+          "conservar una copia de la solicitud.",
       );
+      scrollAlInicio();
       return;
     }
 
-    if (
-      !APP_SCRIPT_URL ||
-      APP_SCRIPT_URL === "PEGAR_AQUI_URL_DEL_WEB_APP"
-    ) {
+    if (!APP_SCRIPT_URL || APP_SCRIPT_URL === "PEGAR_AQUI_URL_DEL_WEB_APP") {
       setErrorMessage(
-        "Todavía no se configuró la URL del Web App de Apps Script."
+        "Todavía no se configuró la URL del Web App de Apps Script.",
       );
+      scrollAlInicio();
       return;
     }
 
@@ -333,24 +327,19 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
         result = JSON.parse(responseText);
       } catch {
         throw new Error(
-          "Apps Script devolvió una respuesta que no pudo interpretarse."
+          "Apps Script devolvió una respuesta que no pudo interpretarse.",
         );
       }
 
       if (!response.ok || result.success !== true) {
         throw new Error(
-          result.message ||
-            result.error ||
-            "No se pudo guardar la solicitud."
+          result.message || result.error || "No se pudo guardar la solicitud.",
         );
       }
 
       const whatsappUrl =
         result.whatsappUrl ||
-        crearWhatsAppUrl(
-          payload.nombreApellido,
-          result.pdfUrl || ""
-        );
+        crearWhatsAppUrl(payload.nombreApellido, result.pdfUrl || "");
 
       setWasSent(true);
       setIsDirty(false);
@@ -359,9 +348,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
         solicitudId: result.solicitudId || result.id || "",
         pdfUrl: result.pdfUrl || "",
         whatsappUrl,
-        message:
-          result.message ||
-          "La solicitud fue registrada correctamente.",
+        message: result.message || "La solicitud fue registrada correctamente.",
       });
 
       /*
@@ -370,14 +357,16 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
        */
       setFormData(INITIAL_FORM_DATA);
       localStorage.removeItem(STORAGE_KEY);
+scrollAlInicio();
     } catch (error) {
       console.error("Error al enviar solicitud:", error);
 
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Ocurrió un error inesperado al enviar la solicitud."
+          : "Ocurrió un error inesperado al enviar la solicitud.",
       );
+      scrollAlInicio();
     } finally {
       setIsSubmitting(false);
     }
@@ -410,23 +399,14 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
     pdf.setFont("helvetica", fontStyle);
     pdf.setFontSize(fontSize);
 
-    const lineas = pdf.splitTextToSize(
-      texto || "-",
-      ancho
-    );
+    const lineas = pdf.splitTextToSize(texto || "-", ancho);
 
     pdf.text(lineas, x, y);
 
     return y + lineas.length * lineHeight;
   };
 
-  const agregarCampoPdf = ({
-    pdf,
-    titulo,
-    valor,
-    y,
-    multiline = false,
-  }) => {
+  const agregarCampoPdf = ({ pdf, titulo, valor, y, multiline = false }) => {
     const marginX = 18;
     const pageWidth = pdf.internal.pageSize.getWidth();
     const contentWidth = pageWidth - marginX * 2;
@@ -441,28 +421,32 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
     pdf.text(`${titulo}:`, marginX, y);
 
     if (multiline) {
-      return agregarTextoConSalto({
-        pdf,
-        texto: valor || "-",
-        x: marginX,
-        y: y + 6,
-        ancho: contentWidth,
-        lineHeight: 5,
-        fontSize: 10,
-      }) + 3;
+      return (
+        agregarTextoConSalto({
+          pdf,
+          texto: valor || "-",
+          x: marginX,
+          y: y + 6,
+          ancho: contentWidth,
+          lineHeight: 5,
+          fontSize: 10,
+        }) + 3
+      );
     }
 
     const titleWidth = pdf.getTextWidth(`${titulo}: `);
 
-    return agregarTextoConSalto({
-      pdf,
-      texto: valor || "-",
-      x: marginX + titleWidth,
-      y,
-      ancho: contentWidth - titleWidth,
-      lineHeight: 5,
-      fontSize: 10,
-    }) + 3;
+    return (
+      agregarTextoConSalto({
+        pdf,
+        texto: valor || "-",
+        x: marginX + titleWidth,
+        y,
+        ancho: contentWidth - titleWidth,
+        lineHeight: 5,
+        fontSize: 10,
+      }) + 3
+    );
   };
 
   const agregarTituloSeccionPdf = (pdf, titulo, y) => {
@@ -488,6 +472,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
     if (validationError) {
       setErrorMessage(validationError);
+      scrollAlInicio();
       return;
     }
 
@@ -511,12 +496,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
        */
       pdf.setFont("helvetica", "bold");
       pdf.setFontSize(17);
-      pdf.text(
-        "SOLICITUD DE SERVICIO",
-        pageWidth / 2,
-        20,
-        { align: "center" }
-      );
+      pdf.text("SOLICITUD DE SERVICIO", pageWidth / 2, 20, { align: "center" });
 
       pdf.setFont("helvetica", "normal");
       pdf.setFontSize(9);
@@ -524,7 +504,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
         `Fecha de creación: ${new Date().toLocaleString("es-AR")}`,
         pageWidth / 2,
         27,
-        { align: "center" }
+        { align: "center" },
       );
 
       pdf.setDrawColor(30, 58, 138);
@@ -533,11 +513,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
       let y = 42;
 
-      y = agregarTituloSeccionPdf(
-        pdf,
-        "DATOS DEL CLIENTE",
-        y
-      );
+      y = agregarTituloSeccionPdf(pdf, "DATOS DEL CLIENTE", y);
 
       y = agregarCampoPdf({
         pdf,
@@ -555,11 +531,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
       y += 4;
 
-      y = agregarTituloSeccionPdf(
-        pdf,
-        "DATOS DE CONTACTO",
-        y
-      );
+      y = agregarTituloSeccionPdf(pdf, "DATOS DE CONTACTO", y);
 
       y = agregarCampoPdf({
         pdf,
@@ -610,11 +582,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
       y += 4;
 
-      y = agregarTituloSeccionPdf(
-        pdf,
-        "SERVICIO DE INTERNET",
-        y
-      );
+      y = agregarTituloSeccionPdf(pdf, "SERVICIO DE INTERNET", y);
 
       y = agregarCampoPdf({
         pdf,
@@ -654,11 +622,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
       y += 4;
 
-      y = agregarTituloSeccionPdf(
-        pdf,
-        "VISITA Y ASIGNACIONES",
-        y
-      );
+      y = agregarTituloSeccionPdf(pdf, "VISITA Y ASIGNACIONES", y);
 
       y = agregarCampoPdf({
         pdf,
@@ -681,10 +645,9 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
         y,
       });
 
-      const nombreArchivo =
-        `SOLICITUD_${limpiarNombreArchivo(
-          data.nombreApellido
-        )}_${data.dni}_${formatearFechaArchivo()}.pdf`;
+      const nombreArchivo = `SOLICITUD_${limpiarNombreArchivo(
+        data.nombreApellido,
+      )}_${data.dni}_${formatearFechaArchivo()}.pdf`;
 
       pdf.save(nombreArchivo);
 
@@ -693,9 +656,8 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
     } catch (error) {
       console.error("Error al generar PDF:", error);
 
-      setErrorMessage(
-        "No se pudo generar el PDF en el dispositivo."
-      );
+      setErrorMessage("No se pudo generar el PDF en el dispositivo.");
+      scrollAlInicio();
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -744,9 +706,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
                 Solicitud registrada
               </h2>
 
-              <p className="text-sm text-green-900">
-                {successData.message}
-              </p>
+              <p className="text-sm text-green-900">{successData.message}</p>
 
               {successData.solicitudId && (
                 <p className="mt-2 text-sm font-semibold text-green-900">
@@ -804,8 +764,8 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
             <p className="mb-7 text-sm text-gray-600">
               Los campos marcados con{" "}
-              <span className="font-bold text-orange-500">*</span>{" "}
-              son obligatorios.
+              <span className="font-bold text-orange-500">*</span> son
+              obligatorios.
             </p>
 
             <section className="mb-8">
@@ -813,10 +773,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
               <div className="space-y-5">
                 <div>
-                  <FieldLabel
-                    htmlFor="nombreApellido"
-                    required
-                  >
+                  <FieldLabel htmlFor="nombreApellido" required>
                     Nombre y Apellido
                   </FieldLabel>
 
@@ -1013,10 +970,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
                 </div>
 
                 <div>
-                  <FieldLabel
-                    htmlFor="planSolicitado"
-                    required
-                  >
+                  <FieldLabel htmlFor="planSolicitado" required>
                     Plan solicitado
                   </FieldLabel>
 
@@ -1029,9 +983,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
                     disabled={isSubmitting}
                     className={INPUT_CLASS_NAME}
                   >
-                    <option value="">
-                      Seleccione un plan
-                    </option>
+                    <option value="">Seleccione un plan</option>
 
                     {PLANES.map((plan) => (
                       <option key={plan} value={plan}>
@@ -1055,9 +1007,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
                     disabled={isSubmitting}
                     className={INPUT_CLASS_NAME}
                   >
-                    <option value="">
-                      Seleccione un medio de pago
-                    </option>
+                    <option value="">Seleccione un medio de pago</option>
 
                     {MEDIOS_PAGO.map((medio) => (
                       <option key={medio} value={medio}>
@@ -1106,9 +1056,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
             </section>
 
             <section className="mb-8">
-              <SectionTitle>
-                Visita y asignaciones
-              </SectionTitle>
+              <SectionTitle>Visita y asignaciones</SectionTitle>
 
               <div className="space-y-5">
                 <div>
@@ -1130,10 +1078,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
                 </div>
 
                 <div>
-                  <FieldLabel
-                    htmlFor="tecnicoAsignado"
-                    required
-                  >
+                  <FieldLabel htmlFor="tecnicoAsignado" required>
                     Técnico asignado
                   </FieldLabel>
 
@@ -1146,9 +1091,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
                     disabled={isSubmitting}
                     className={INPUT_CLASS_NAME}
                   >
-                    <option value="">
-                      Seleccione un técnico
-                    </option>
+                    <option value="">Seleccione un técnico</option>
 
                     {TECNICOS.map((tecnico) => (
                       <option key={tecnico} value={tecnico}>
@@ -1162,10 +1105,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
                 {formData.tecnicoAsignado === "Otro" && (
                   <div>
-                    <FieldLabel
-                      htmlFor="otroTecnico"
-                      required
-                    >
+                    <FieldLabel htmlFor="otroTecnico" required>
                       Nombre del técnico
                     </FieldLabel>
 
@@ -1220,9 +1160,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
                 disabled={isSubmitting || isGeneratingPdf}
                 className="min-h-12 w-full rounded-lg border-2 border-blue-900 bg-white px-6 py-3 text-base font-bold text-blue-900 transition active:scale-[0.99] active:bg-blue-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
               >
-                {isGeneratingPdf
-                  ? "GENERANDO PDF..."
-                  : "DESCARGAR PDF"}
+                {isGeneratingPdf ? "GENERANDO PDF..." : "DESCARGAR PDF"}
               </button>
 
               <button
@@ -1237,9 +1175,7 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
           </form>
 
           <footer className="mt-6 flex flex-col items-center justify-center p-3">
-            <h4 className="mb-0 text-sm text-black">
-              Diseño y desarrollo:
-            </h4>
+            <h4 className="mb-0 text-sm text-black">Diseño y desarrollo:</h4>
 
             <a
               href="https://www.boostup-marketingdigital.com/"
@@ -1273,13 +1209,13 @@ const [formData, setFormData] = useState(INITIAL_FORM_DATA);
             </h2>
 
             <p className="text-sm leading-6 text-gray-700">
-              Los datos de esta solicitud todavía no fueron
-              enviados ni descargados.
+              Los datos de esta solicitud todavía no fueron enviados ni
+              descargados.
             </p>
 
             <p className="mt-3 text-sm font-semibold leading-6 text-gray-800">
-              Si limpiás el formulario, la información se
-              perderá. ¿Deseás continuar?
+              Si limpiás el formulario, la información se perderá. ¿Deseás
+              continuar?
             </p>
 
             <div className="mt-6 space-y-3">
