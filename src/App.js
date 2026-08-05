@@ -16,6 +16,7 @@ import Sublime from "./components/Sublime/Sublime";
 import Jefaweb from "./components/JefaWeb/Jefaweb";
 import Garbo from "./components/Garbo/Garbo";
 import Home from "./components/Home/Home";
+import AtosVentas from "./components/AtosVentas/AtosVentas";
 
 
 
@@ -42,6 +43,13 @@ const App = () => {
         path="/garbo"
         element={
             <Garbo />
+        }
+      />
+      <Route
+      //Garbo enlaces
+        path="/atos-ventas"
+        element={
+            <AtosVentas />
         }
       />
       <Route

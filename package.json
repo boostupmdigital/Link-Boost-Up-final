@@ -9,6 +9,7 @@
     "@vercel/postgres": "^0.7.2",
     "axios": "^1.4.0",
     "dotenv": "^16.4.7",
+    "jspdf": "^4.2.1",
     "lucide": "^0.17.2",
     "lucide-react": "^0.37.0",
     "motion": "^12.5.0",
