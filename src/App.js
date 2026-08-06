@@ -17,8 +17,7 @@ import Jefaweb from "./components/Links/JefaWeb/Jefaweb";
 import Garbo from "./components/Links/Garbo/Garbo";
 import Home from "./components/Home/Home";
 import AtosVentas from "./components/AtosVentas/AtosVentas";
-//import GestorJCP from "./components/GestorEscribaniaJCP/GestorJCP";
-import DashboardJCP from "./components/GestorEscribaniaJCP/pages/DashboardJCP";
+
 const App = () => {
   return (
     <Routes>
@@ -28,13 +27,7 @@ const App = () => {
         element={<Home />}
       />
 
-<Route
-//Gestor Escribania
-  path="/gestor-escribania-jcp/dashboard"
-  element={
-      <DashboardJCP />}
-      />
-      
+     
         <Route
         //BoostUp enlaces
         path="/boostup"
