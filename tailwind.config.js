@@ -71,14 +71,14 @@ module.exports = {
         },
       },
       animation: {
-        "spin360stop": "spin360stop 3s linear infinite",
+        spin360stop: "spin360stop 3s linear infinite",
         "pulse-delay-1s": "pulseSlow 2s infinite 1s", // Duración 2s, infinito, retraso 1s
         "pulse-delay-2s": "pulseSlow 2s infinite 2s", // Retraso de 2s
         "pulse-delay-3s": "pulseSlow 2s infinite 3s", // Retraso de 2s
         "bounce-slow": "bounceSlow 2s infinite",
         "bounce-slower": "bounceSlow 3s infinite",
-        "fadeIn": "fadeIn 1.5s ease-out forwards",
-        "spin360": "spin360 2s linear infinite 1s",
+        fadeIn: "fadeIn 1.5s ease-out forwards",
+        spin360: "spin360 2s linear infinite 1s",
       },
       backgroundImage: {
         "bg-effect-1": "url('/src/assets/Image/bg-effect-1.webp')",
