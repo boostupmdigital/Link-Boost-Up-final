@@ -15,6 +15,7 @@ export const PLANES = [
   "FO - 100 Megas - CBA - AG",
   "FO - 300 Megas - CBA - AG",
   "FO - 300 Megas al precio de 100 Megas CBA - AG",
+  "FO - 1000 Megas  TV",
   "Plan 20 al precio de 15 mgs",
   "Plan Canje 20",
   "Plan Canje 50 mgs",
