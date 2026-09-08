@@ -1,7 +1,7 @@
 export const APP_SCRIPT_URL =
 "https://script.google.com/macros/s/AKfycbyoBYIa9UpjGQxQwN_4v0vcx_O-w1gOEFwP0eY5HQXY8Dqo4gEtvzVKGO5cpl8DpjdV/exec";
 
-export const WHATSAPP_PRUEBA = "5493512737199";
+export const WHATSAPP_PRUEBA = "5493518001978";
 
 export const STORAGE_KEY = "atos_solicitud_pendiente";
 
