@@ -28,7 +28,7 @@ function Campo({ label, name, value, onChange, required = false, disabled = fals
   return (
     <div className="w-full min-w-0">
       <label htmlFor={name} className="mb-2 block text-sm font-semibold text-blue-900">
-        {label}{required && <span className="ml-1 text-orange-500" aria-label="Obligatorio">*</span>}
+        {label}{required && <span className="ml-1 text-green-500" aria-label="Obligatorio">*</span>}
       </label>
       {textarea ? (
         <textarea id={name} name={name} value={value} onChange={onChange} disabled={disabled}
@@ -268,7 +268,7 @@ export default function SolenarVentas() {
         )}
         <form onSubmit={handleEnviar} noValidate className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-6 text-left shadow-sm">
           {errorMessage && <div role="alert" className="mb-6 rounded-lg border border-red-300 bg-red-50 p-4 text-sm font-medium text-red-800">{errorMessage}</div>}
-          <p className="mb-7 text-sm text-gray-600">Los campos marcados con <span className="text-orange-500">*</span> son obligatorios.</p>
+          <p className="mb-7 text-sm text-gray-600">Los campos marcados con <span className="text-green-500">*</span> son obligatorios.</p>
 
           <section className="mb-8 space-y-5">
             <Seccion>Visita y lead</Seccion>
@@ -310,7 +310,7 @@ export default function SolenarVentas() {
           </section>
 
           <div className="space-y-3 border-t border-gray-200 pt-6">
-            <button type="submit" disabled={ocupado} className="min-h-12 w-full rounded-lg bg-orange-500 px-6 py-3 text-base font-bold text-white transition active:bg-orange-600 disabled:opacity-50">
+            <button type="submit" disabled={ocupado} className="min-h-12 w-full rounded-lg bg-green-500 px-6 py-3 text-base font-bold text-white transition active:bg-green-600 disabled:opacity-50">
               {isSubmitting ? "ENVIANDO..." : "ENVIAR"}
             </button>
             <button type="button" disabled={ocupado} onClick={handleDescargarPdf} className="min-h-12 w-full rounded-lg border-2 border-blue-900 bg-white px-6 py-3 text-base font-bold text-blue-900 disabled:opacity-50">
