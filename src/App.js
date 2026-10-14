@@ -17,6 +17,7 @@ import Jefaweb from "./components/Links/JefaWeb/Jefaweb";
 import Garbo from "./components/Links/Garbo/Garbo";
 import Home from "./components/Home/Home";
 import AtosVentas from "./components/AtosVentas/AtosVentas";
+import SolenarVentas from "./components/SolenarVentas/SolenarVentas";
 
 const App = () => {
   return (
@@ -45,6 +46,13 @@ const App = () => {
         path="/atos-ventas"
         element={<AtosVentas />}
       />
+
+       <Route
+        //Garbo enlaces
+        path="/solenar-ventas"
+        element={<SolenarVentas />}
+      />
+
       <Route
         //Jefa web enlaces
         path="/jefa"
