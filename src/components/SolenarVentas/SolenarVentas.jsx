@@ -1,1312 +1,340 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { jsPDF } from "jspdf";
+import React, { useEffect, useState } from "react";
 import {
-  APP_SCRIPT_URL,
-  WHATSAPP_PRUEBA,
-  STORAGE_KEY,
-  PLANES,
-  MEDIOS_PAGO,
-  TECNICOS,
-  TECNICOS_INFO,
-  INITIAL_FORM_DATA,
-  INPUT_CLASS_NAME,
-  TEXTAREA_CLASS_NAME,
+  APP_SCRIPT_URL, STORAGE_KEY, REQUEST_ID_KEY, SERVICIOS, MONEDA,
+  INITIAL_FORM_DATA, INPUT_CLASS_NAME, TEXTAREA_CLASS_NAME,
 } from "./Constantes";
-//import { Links, Redes } from "./LinksData.js";
+import { descargarPdfSolenar } from "./pdfSolenar";
 import Logo from "../../assets/Image/logo-solenar-circular.jpg";
 import Boostup from "../../assets/Image/boostup-negro.png";
 
-const normalizarEspacios = (valor = "") => valor.trim().replace(/\s+/g, " ");
-
-const obtenerFechaLocalISO = () => {
-  const hoy = new Date();
-  const year = hoy.getFullYear();
-  const month = String(hoy.getMonth() + 1).padStart(2, "0");
-  const day = String(hoy.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
+const hoyLocal = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+};
+const crearFormularioVacio = () => ({ ...INITIAL_FORM_DATA, fechaVisita: hoyLocal() });
+const texto = (s) => String(s ?? "").trim().replace(/\s+/g," ");
+const formatoFechaValido = (s) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const [a,m,d] = s.split("-").map(Number);
+  const f = new Date(a,m-1,d);
+  return f.getFullYear() === a && f.getMonth() === m-1 && f.getDate() === d;
+};
+const nuevoIdCliente = () => {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  return `lead-${Date.now()}-${Math.random().toString(36).slice(2,11)}`;
 };
 
-const formatearFechaArgentina = (fechaISO) => {
-  if (!fechaISO) return "";
-
-  const [year, month, day] = fechaISO.split("-");
-
-  if (!year || !month || !day) return fechaISO;
-
-  return `${day}/${month}/${year}`;
-};
-
-const formatearFechaArchivo = () => {
-  const fecha = new Date();
-
-  const year = fecha.getFullYear();
-  const month = String(fecha.getMonth() + 1).padStart(2, "0");
-  const day = String(fecha.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-};
-
-const limpiarNombreArchivo = (texto = "") =>
-  normalizarEspacios(texto)
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-zA-Z0-9 ]/g, "")
-    .replace(/\s+/g, "_");
-
-const FieldLabel = ({ htmlFor, children, required = false }) => (
-  <label
-    htmlFor={htmlFor}
-    className="mb-2 block text-sm font-semibold text-blue-900"
-  >
-    {children}
-
-    {required && (
-      <span className="ml-1 text-orange-500" aria-hidden="true">
-        *
-      </span>
-    )}
-  </label>
+function Campo({ label, name, value, onChange, required = false, disabled = false, textarea = false, options, ...props }) {
+  return (
+    <div className="w-full min-w-0">
+      <label htmlFor={name} className="mb-2 block text-sm font-semibold text-blue-900">
+        {label}{required && <span className="ml-1 text-orange-500" aria-label="Obligatorio">*</span>}
+      </label>
+      {textarea ? (
+        <textarea id={name} name={name} value={value} onChange={onChange} disabled={disabled}
+          className={TEXTAREA_CLASS_NAME} rows={3} {...props} />
+      ) : options ? (
+        <select id={name} name={name} value={value} onChange={onChange} disabled={disabled}
+          required={required} className={INPUT_CLASS_NAME}>
+          <option value="">Seleccionar...</option>
+          {options.map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+      ) : (
+        <input id={name} name={name} value={value} onChange={onChange} disabled={disabled}
+          required={required} className={INPUT_CLASS_NAME} {...props} />
+      )}
+    </div>
+  );
+}
+const Seccion = ({ children }) => (
+  <h2 className="mb-5 border-b border-gray-200 pb-2 text-lg font-bold text-blue-900">{children}</h2>
 );
 
-const SectionTitle = ({ children }) => (
-  <h2 className="mb-5 border-b border-gray-200 pb-2 text-lg font-bold text-blue-900">
-    {children}
-  </h2>
-);
-
-const SolenarVentas = () => {
-  const [formData, setFormData] = useState(INITIAL_FORM_DATA);
-
+export default function SolenarVentas() {
+  const [formData, setFormData] = useState(() => {
+    try {
+      const guardado = localStorage.getItem(STORAGE_KEY);
+      return guardado ? { ...crearFormularioVacio(), ...JSON.parse(guardado) } : crearFormularioVacio();
+    } catch { return crearFormularioVacio(); }
+  });
+  const [isDirty, setIsDirty] = useState(() => {
+    try { return Boolean(localStorage.getItem(STORAGE_KEY)); } catch { return false; }
+  });
+  const [wasDownloaded, setWasDownloaded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-
-  const [wasSent, setWasSent] = useState(false);
-  const [wasDownloaded, setWasDownloaded] = useState(false);
-  const [isDirty, setIsDirty] = useState(false);
-
-  const [showClearWarning, setShowClearWarning] = useState(false);
-
   const [errorMessage, setErrorMessage] = useState("");
   const [successData, setSuccessData] = useState(null);
+  const [showClearWarning, setShowClearWarning] = useState(false);
+  const [downloadMessage, setDownloadMessage] = useState("");
 
-  const fechaMinima = useMemo(() => obtenerFechaLocalISO(), []);
-
-  const [showTechnicianInfo, setShowTechnicianInfo] = useState(false);
-
-  const tecnicoSeleccionadoInfo = useMemo(() => {
-    return TECNICOS_INFO.find(
-      (tecnico) => tecnico.nombre === formData.tecnicoAsignado,
-    );
-  }, [formData.tecnicoAsignado]);
-
-  /*
-   * Recuperar borrador pendiente.
-   */
-  useEffect(() => {
-    try {
-      const savedForm = localStorage.getItem(STORAGE_KEY);
-
-      if (!savedForm) return;
-
-      const parsedForm = JSON.parse(savedForm);
-
-      setFormData({
-        ...INITIAL_FORM_DATA,
-        ...parsedForm,
-      });
-
-      setIsDirty(true);
-    } catch (error) {
-      console.error("No se pudo recuperar el formulario:", error);
-      localStorage.removeItem(STORAGE_KEY);
-    }
-  }, []);
-
-  /*
-   * Guardar borrador mientras se completa el formulario.
-   */
   useEffect(() => {
     if (!isDirty) return;
-
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
-    } catch (error) {
-      console.error("No se pudo guardar el formulario:", error);
-    }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(formData)); }
+    catch (err) { console.warn("No se pudo guardar el borrador local", err); }
   }, [formData, isDirty]);
 
-  const tecnicoFinal = useMemo(() => {
-    if (formData.tecnicoAsignado === "Otro") {
-      return normalizarEspacios(formData.otroTecnico);
+  useEffect(() => {
+    if (errorMessage || successData || downloadMessage) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
+  }, [errorMessage, successData, downloadMessage]);
 
-    return normalizarEspacios(formData.tecnicoAsignado);
-  }, [formData.tecnicoAsignado, formData.otroTecnico]);
-
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    let sanitizedValue = value;
-
-    if (name === "dni") {
-      sanitizedValue = value.replace(/\D/g, "").slice(0, 8);
-    }
-
-    if (name === "telefono") {
-      sanitizedValue = value.replace(/[^0-9+\-() ]/g, "").slice(0, 14);
-    }
-
-    if (name === "numero") {
-      sanitizedValue = value.slice(0, 10);
-    }
-
-    setFormData((currentData) => {
-      const nextData = {
-        ...currentData,
-        [name]: sanitizedValue,
-      };
-
-      if (name === "tecnicoAsignado" && sanitizedValue !== "Otro") {
-        nextData.otroTecnico = "";
+  const handleChange = (e) => {
+    const {name, value} = e.target;
+    let limpio = value;
+    if (name === "telefono") limpio = value.replace(/[^0-9+()\- ]/g, "").slice(0,14);
+    if (name === "numero") limpio = value.slice(0,15);
+    if (name === "presupuesto") limpio = value.replace(/[^0-9.,]/g, "").slice(0,20);
+    setFormData(anterior => {
+      const nuevo = { ...anterior, [name]: limpio };
+      if (name === "presupuesto" && limpio.trim() && !anterior.fechaPresupuesto) {
+        nuevo.fechaPresupuesto = hoyLocal();
       }
-
-      return nextData;
+      if (name === "presupuesto" && !limpio.trim()) {
+        nuevo.moneda = "";
+        nuevo.fechaPresupuesto = "";
+      }
+      return nuevo;
     });
-
-    /*
-     * Si se modifica el formulario después de descargarlo,
-     * la versión actual deja de considerarse respaldada.
-     */
-    setIsDirty(true);
-    setWasSent(false);
+    // Un contenido modificado ya no coincide con el PDF anterior ni con un intento pendiente.
+    try { localStorage.removeItem(REQUEST_ID_KEY); } catch { /* almacenamiento no disponible */ }
     setWasDownloaded(false);
+    setIsDirty(true);
     setErrorMessage("");
+    setDownloadMessage("");
     setSuccessData(null);
+  };
+
+  const prepararPayload = () => {
+    const importe = texto(formData.presupuesto).replace(",", ".");
+    return {
+      fechaVisita: formData.fechaVisita,
+      nombreApellido: texto(formData.nombreApellido),
+      email: texto(formData.email).toLowerCase(),
+      telefono: texto(formData.telefono),
+      calle: texto(formData.calle),
+      numero: texto(formData.numero),
+      barrio: texto(formData.barrio),
+      observacionesDomicilio: formData.observacionesDomicilio.trim(),
+      urlUbicacion: formData.urlUbicacion.trim(),
+      servicio: formData.servicio,
+      presupuesto: importe,
+      moneda: formData.moneda,
+      fechaPresupuesto: formData.fechaPresupuesto,
+      observacionesServicio: formData.observacionesServicio.trim(),
+      vendedor: texto(formData.vendedor),
+      origen: "React Solenar - Leads externos",
+    };
   };
 
   const validarFormulario = () => {
-    const dniValido = /^[0-9]{7,8}$/.test(formData.dni);
-
-    if (!dniValido) {
-      return "El DNI debe contener únicamente 7 u 8 números.";
+    const p = prepararPayload();
+    const obligatorios = [
+      [p.fechaVisita,"Fecha de visita"],[p.nombreApellido,"Nombre y Apellido"],
+      [p.email,"Email"],[p.telefono,"Teléfono"],
+      [p.calle,"Calle"],[p.numero,"Número"],[p.barrio,"Barrio o Localidad"],
+      [p.servicio,"Servicio de interés"],[p.vendedor,"Vendedor"],
+    ];
+    const falta = obligatorios.find(([v]) => !v);
+    if (falta) return `El campo «${falta[1]}» es obligatorio.`;
+    if (!formatoFechaValido(p.fechaVisita)) return "Ingresá una fecha de visita válida.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email)) return "Ingresá una dirección de email válida.";
+    if (!/^[0-9+()\- ]{7,14}$/.test(p.telefono)) return "El teléfono debe tener entre 7 y 14 caracteres permitidos.";
+    if (p.urlUbicacion) {
+      try { const u = new URL(p.urlUbicacion); if (!["http:","https:"].includes(u.protocol)) throw Error(); }
+      catch { return "La ubicación debe ser un enlace web válido (https://...)."; }
     }
-
-    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-      formData.email.trim(),
-    );
-
-    if (!emailValido) {
-      return "Ingresá una dirección de email válida.";
+    if (p.presupuesto) {
+      if (!/^\d+(?:\.\d{1,2})?$/.test(p.presupuesto) || !Number.isFinite(+p.presupuesto)) {
+        return "El importe debe ser numérico, sin separadores de miles y con hasta 2 decimales.";
+      }
+      if (!p.moneda) return "Seleccioná la moneda del presupuesto.";
+      if (!formatoFechaValido(p.fechaPresupuesto)) return "Seleccioná la fecha del presupuesto.";
+    } else if (p.moneda || p.fechaPresupuesto) {
+      return "Para informar moneda o fecha del presupuesto, ingresá el importe.";
     }
-
-    const telefonoValido = /^[0-9+\-() ]{7,14}$/.test(formData.telefono.trim());
-
-    if (!telefonoValido) {
-      return (
-        "El teléfono debe tener entre 7 y 14 caracteres y solo puede " +
-        "contener números, espacios, paréntesis, guiones y el signo +."
-      );
-    }
-
-    if (!formData.fechaVisita) {
-      return "Seleccioná una fecha tentativa de visita.";
-    }
-
-    if (formData.fechaVisita < fechaMinima) {
-      return "La fecha tentativa de visita no puede ser anterior a hoy.";
-    }
-
-    if (!formData.tecnicoAsignado) {
-      return "Seleccioná un técnico asignado.";
-    }
-
-    if (
-      formData.tecnicoAsignado === "Otro" &&
-      !normalizarEspacios(formData.otroTecnico)
-    ) {
-      return "Ingresá el nombre del técnico.";
-    }
-
-    if (!normalizarEspacios(formData.vendedor)) {
-      return "Ingresá el nombre del vendedor.";
-    }
-
     return "";
   };
 
-  const prepararPayload = () => ({
-    nombreApellido: normalizarEspacios(formData.nombreApellido),
-    dni: formData.dni.trim(),
-    email: formData.email.trim().toLowerCase(),
-    telefono: formData.telefono.trim(),
-
-    calle: normalizarEspacios(formData.calle),
-    numero: normalizarEspacios(formData.numero),
-    barrio: normalizarEspacios(formData.barrio),
-    observacionesDomicilio: normalizarEspacios(formData.observacionesDomicilio),
-
-    empresaActual: normalizarEspacios(formData.empresaActual),
-    planSolicitado: formData.planSolicitado,
-    medioPago: formData.medioPago,
-    promocion: normalizarEspacios(formData.promocion),
-    observacionesPlan: normalizarEspacios(formData.observacionesPlan),
-
-    fechaVisita: formData.fechaVisita,
-    tecnico: tecnicoFinal,
-    vendedor: normalizarEspacios(formData.vendedor),
-
-    origen: "Formulario React SOLENAR",
-  });
-
   const resetForm = () => {
-    setFormData(INITIAL_FORM_DATA);
-
-    setWasSent(false);
-    setWasDownloaded(false);
+    setFormData(crearFormularioVacio());
     setIsDirty(false);
-
+    setWasDownloaded(false);
     setErrorMessage("");
-    setShowClearWarning(false);
-
-    localStorage.removeItem(STORAGE_KEY);
-  };
-
-  const scrollAlInicio = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
-  };
-
-  const handleEnviar = async (event) => {
-    event.preventDefault();
-
-    setErrorMessage("");
+    setDownloadMessage("");
     setSuccessData(null);
-
-    const validationError = validarFormulario();
-
-    if (validationError) {
-      setErrorMessage(validationError);
-      scrollAlInicio();
-      return;
-    }
-
-    if (!navigator.onLine) {
-      setErrorMessage(
-        "No hay conexión a internet. Podés descargar el PDF para " +
-          "conservar una copia de la solicitud.",
-      );
-      scrollAlInicio();
-      return;
-    }
-
-    if (!APP_SCRIPT_URL || APP_SCRIPT_URL === "PEGAR_AQUI_URL_DEL_WEB_APP") {
-      setErrorMessage(
-        "Todavía no se configuró la URL del Web App de Apps Script.",
-      );
-      scrollAlInicio();
-      return;
-    }
-
-    setIsSubmitting(true);
-
+    setShowClearWarning(false);
     try {
-      const payload = prepararPayload();
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(REQUEST_ID_KEY);
+    } catch { /* almacenamiento deshabilitado */ }
+  };
 
-      /*
-       * text/plain evita una solicitud OPTIONS previa en muchos casos
-       * al comunicarse con Apps Script.
-       */
+  const handleEnviar = async (e) => {
+    e.preventDefault();
+    setErrorMessage("");
+    setDownloadMessage("");
+    const error = validarFormulario();
+    if (error) { setErrorMessage(error); return; }
+    if (!navigator.onLine) {
+      setErrorMessage("No hay conexión. Descargá el PDF para conservar una copia y enviarlo después.");
+      return;
+    }
+    if (!/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(APP_SCRIPT_URL.trim())) {
+      setErrorMessage("Falta configurar APP_SCRIPT_URL con la URL /exec de Apps Script.");
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      let requestId;
+      try { requestId = localStorage.getItem(REQUEST_ID_KEY); } catch { /* sin localStorage */ }
+      if (!requestId) {
+        requestId = nuevoIdCliente();
+        try { localStorage.setItem(REQUEST_ID_KEY, requestId); } catch { /* sin localStorage */ }
+      }
+      const payload = {...prepararPayload(), clientRequestId: requestId};
       const response = await fetch(APP_SCRIPT_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "text/plain;charset=utf-8",
-        },
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload),
         redirect: "follow",
       });
-
-      const responseText = await response.text();
-
-      let result;
-
-      try {
-        result = JSON.parse(responseText);
-      } catch {
-        throw new Error(
-          "Apps Script devolvió una respuesta que no pudo interpretarse.",
-        );
+      const bruto = await response.text();
+      let resultado;
+      try { resultado = JSON.parse(bruto); }
+      catch { throw new Error("El servidor no devolvió una respuesta JSON válida. Revisá el despliegue."); }
+      if (!response.ok || resultado.success !== true) {
+        throw new Error(resultado.message || "No se pudo registrar el lead.");
       }
-
-      if (!response.ok || result.success !== true) {
-        throw new Error(
-          result.message || result.error || "No se pudo guardar la solicitud.",
-        );
-      }
-
-      const whatsappUrl =
-        result.whatsappUrl ||
-        crearWhatsAppUrl(payload.nombreApellido, result.pdfUrl || "");
-
-      setWasSent(true);
+      setSuccessData(resultado);
+      setFormData(crearFormularioVacio());
       setIsDirty(false);
-
-      setSuccessData({
-        solicitudId: result.solicitudId || result.id || "",
-        pdfUrl: result.pdfUrl || "",
-        whatsappUrl,
-        message: result.message || "La solicitud fue registrada correctamente.",
-      });
-
-      /*
-       * Se limpia el borrador y el formulario después de que Apps Script
-       * confirma que el proceso finalizó.
-       */
-      setFormData(INITIAL_FORM_DATA);
-      localStorage.removeItem(STORAGE_KEY);
-      scrollAlInicio();
-    } catch (error) {
-      console.error("Error al enviar solicitud:", error);
-
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Ocurrió un error inesperado al enviar la solicitud.",
-      );
-      scrollAlInicio();
+      setWasDownloaded(false);
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(REQUEST_ID_KEY);
+      } catch { /* sin localStorage */ }
+    } catch (err) {
+      console.error("Error Solenar:", err);
+      setErrorMessage(err.message || "Falló la conexión. Conservamos el formulario para reintentar.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const crearWhatsAppUrl = (nombreApellido, pdfUrl) => {
-    const mensaje = [
-      `Nueva alta a verificar ${nombreApellido}.`,
-      pdfUrl ? `Ver PDF: ${pdfUrl}` : "",
-    ]
-      .filter(Boolean)
-      .join(" ");
-
-    return (
-      `https://wa.me/${WHATSAPP_PRUEBA}` +
-      `?text=${encodeURIComponent(mensaje)}`
-    );
-  };
-
-  const agregarTextoConSalto = ({
-    pdf,
-    texto,
-    x,
-    y,
-    ancho,
-    lineHeight = 5,
-    fontSize = 10,
-    fontStyle = "normal",
-  }) => {
-    pdf.setFont("helvetica", fontStyle);
-    pdf.setFontSize(fontSize);
-
-    const lineas = pdf.splitTextToSize(texto || "-", ancho);
-
-    pdf.text(lineas, x, y);
-
-    return y + lineas.length * lineHeight;
-  };
-
-  const agregarCampoPdf = ({ pdf, titulo, valor, y, multiline = false }) => {
-    const marginX = 18;
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const contentWidth = pageWidth - marginX * 2;
-
-    if (y > 270) {
-      pdf.addPage();
-      y = 20;
-    }
-
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(10);
-    pdf.text(`${titulo}:`, marginX, y);
-
-    if (multiline) {
-      return (
-        agregarTextoConSalto({
-          pdf,
-          texto: valor || "-",
-          x: marginX,
-          y: y + 6,
-          ancho: contentWidth,
-          lineHeight: 5,
-          fontSize: 10,
-        }) + 3
-      );
-    }
-
-    const titleWidth = pdf.getTextWidth(`${titulo}: `);
-
-    return (
-      agregarTextoConSalto({
-        pdf,
-        texto: valor || "-",
-        x: marginX + titleWidth,
-        y,
-        ancho: contentWidth - titleWidth,
-        lineHeight: 5,
-        fontSize: 10,
-      }) + 3
-    );
-  };
-
-  const agregarTituloSeccionPdf = (pdf, titulo, y) => {
-    if (y > 265) {
-      pdf.addPage();
-      y = 20;
-    }
-
-    const pageWidth = pdf.internal.pageSize.getWidth();
-
-    pdf.setFillColor(235, 239, 246);
-    pdf.rect(15, y - 5, pageWidth - 30, 9, "F");
-
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(11);
-    pdf.text(titulo, 18, y + 1);
-
-    return y + 11;
-  };
-
-  const generarPdfLocal = () => {
-    const validationError = validarFormulario();
-
-    if (validationError) {
-      setErrorMessage(validationError);
-      scrollAlInicio();
-      return;
-    }
-
+  const handleDescargarPdf = () => {
+    const error = validarFormulario();
+    if (error) { setErrorMessage(error); return; }
     setErrorMessage("");
+    setDownloadMessage("");
     setIsGeneratingPdf(true);
-
     try {
-      const data = prepararPayload();
-
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-
-      const pageWidth = pdf.internal.pageSize.getWidth();
-
-      /*
-       * Encabezado.
-       * Luego se puede incorporar el logo mediante pdf.addImage().
-       */
-      pdf.setFont("helvetica", "bold");
-      pdf.setFontSize(17);
-      pdf.text("SOLICITUD DE SERVICIO", pageWidth / 2, 20, { align: "center" });
-
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(9);
-      pdf.text(
-        `Fecha de creación: ${new Date().toLocaleString("es-AR")}`,
-        pageWidth / 2,
-        27,
-        { align: "center" },
-      );
-
-      pdf.setDrawColor(30, 58, 138);
-      pdf.setLineWidth(0.6);
-      pdf.line(15, 31, pageWidth - 15, 31);
-
-      let y = 42;
-
-      y = agregarTituloSeccionPdf(pdf, "DATOS DEL CLIENTE", y);
-
-      y = agregarCampoPdf({
-        pdf,
-        titulo: "Nombre y Apellido",
-        valor: data.nombreApellido,
-        y,
-      });
-
-      y = agregarCampoPdf({
-        pdf,
-        titulo: "DNI",
-        valor: data.dni,
-        y,
-      });
-
-      y += 4;
-
-      y = agregarTituloSeccionPdf(pdf, "DATOS DE CONTACTO", y);
-
-      y = agregarCampoPdf({
-        pdf,
-        titulo: "E-mail",
-        valor: data.email,
-        y,
-      });
-
-      y = agregarCampoPdf({
-        pdf,
-        titulo: "Teléfono",
-        valor: data.telefono,
-        y,
-      });
-
-      y += 4;
-
-      y = agregarTituloSeccionPdf(pdf, "DOMICILIO", y);
-
-      y = agregarCampoPdf({
-        pdf,
-        titulo: "Calle",
-        valor: data.calle,
-        y,
-      });
-
-      y = agregarCampoPdf({
-        pdf,
-        titulo: "Nro.",
-        valor: data.numero,
-        y,
-      });
-
-      y = agregarCampoPdf({
-        pdf,
-        titulo: "Barrio",
-        valor: data.barrio,
-        y,
-      });
-
-      y = agregarCampoPdf({
-        pdf,
-        titulo: "Observaciones",
-        valor: data.observacionesDomicilio,
-        y,
-        multiline: true,
-      });
-
-      y += 4;
-
-      y = agregarTituloSeccionPdf(pdf, "SERVICIO DE INTERNET", y);
-
-      y = agregarCampoPdf({
-        pdf,
-        titulo: "Empresa actual",
-        valor: data.empresaActual,
-        y,
-      });
-
-      y = agregarCampoPdf({
-        pdf,
-        titulo: "Plan solicitado",
-        valor: data.planSolicitado,
-        y,
-      });
-
-      y = agregarCampoPdf({
-        pdf,
-        titulo: "Medio de pago",
-        valor: data.medioPago,
-        y,
-      });
-
-      y = agregarCampoPdf({
-        pdf,
-        titulo: "Promoción o descuento",
-        valor: data.promocion,
-        y,
-      });
-
-      y = agregarCampoPdf({
-        pdf,
-        titulo: "Observaciones",
-        valor: data.observacionesPlan,
-        y,
-        multiline: true,
-      });
-
-      y += 4;
-
-      y = agregarTituloSeccionPdf(pdf, "VISITA Y ASIGNACIONES", y);
-
-      y = agregarCampoPdf({
-        pdf,
-        titulo: "Fecha tentativa de visita",
-        valor: formatearFechaArgentina(data.fechaVisita),
-        y,
-      });
-
-      y = agregarCampoPdf({
-        pdf,
-        titulo: "Técnico asignado",
-        valor: data.tecnico,
-        y,
-      });
-
-      agregarCampoPdf({
-        pdf,
-        titulo: "Vendedor",
-        valor: data.vendedor,
-        y,
-      });
-
-      const nombreArchivo = `SOLICITUD_${limpiarNombreArchivo(
-        data.nombreApellido,
-      )}_${data.dni}_${formatearFechaArchivo()}.pdf`;
-
-      pdf.save(nombreArchivo);
-
+      const nombre = descargarPdfSolenar(prepararPayload());
       setWasDownloaded(true);
-      setIsDirty(true);
-    } catch (error) {
-      console.error("Error al generar PDF:", error);
-
-      setErrorMessage("No se pudo generar el PDF en el dispositivo.");
-      scrollAlInicio();
+      setDownloadMessage(`Se preparó «${nombre}». El lead todavía NO fue registrado en Sheets.`);
+    } catch (err) {
+      console.error("Error al crear el PDF local", err);
+      setErrorMessage("No se pudo generar el PDF en este dispositivo.");
     } finally {
       setIsGeneratingPdf(false);
     }
   };
-
   const handleLimpiar = () => {
-    if (!isDirty) {
-      resetForm();
-      return;
-    }
-
-    if (wasSent || wasDownloaded) {
-      resetForm();
-      return;
-    }
-
-    setShowClearWarning(true);
+    if (isDirty && !wasDownloaded) setShowClearWarning(true);
+    else resetForm();
   };
 
-  const handleConfirmarLimpieza = () => {
-    resetForm();
-  };
-
+  const ocupado = isSubmitting || isGeneratingPdf;
   return (
-    <React.Fragment>
-      <div className="min-h-screen w-full overflow-x-hidden bg-gray-50">
-        <main className="flex min-h-screen w-full flex-col items-center px-3 py-6">
-          <div className="flex w-full max-w-36 items-center justify-center p-3">
-            <img
-              src={Logo}
-              alt="Solenar"
-              className="h-auto w-full object-contain"
-            />
+    <div className="min-h-screen w-full overflow-x-hidden bg-gray-50">
+      <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col items-center px-3 py-6">
+        <img src={Logo} alt="Logo Solenar" className="h-auto w-36 object-contain" />
+        <h1 className="mb-5 mt-3 text-center text-2xl font-bold text-black">REGISTRO DE LEADS</h1>
+        {successData && (
+          <div role="status" className="mb-5 w-full rounded-xl border border-lime-300 bg-lime-50 p-4 text-left">
+            <h2 className="text-lg font-bold text-lime-900">Lead registrado correctamente</h2>
+            <p className="mt-1 text-sm text-gray-800">{successData.message}</p>
+            <p className="mt-2 text-sm font-semibold text-lime-900">ID: {successData.solicitudId}</p>
+            {successData.pdfUrl && <a href={successData.pdfUrl} target="_blank" rel="noreferrer"
+              className="mt-3 flex min-h-12 items-center justify-center rounded-lg bg-white px-4 py-3 text-center font-semibold text-blue-900 ring-1 ring-blue-900">Ver PDF en Drive</a>}
+            <button type="button" onClick={() => setSuccessData(null)} className="mt-3 text-sm font-semibold text-blue-900 underline">Cerrar aviso</button>
           </div>
+        )}
+        {downloadMessage && (
+          <div role="status" className="mb-5 w-full rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
+            {downloadMessage}
+          </div>
+        )}
+        <form onSubmit={handleEnviar} noValidate className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-6 text-left shadow-sm">
+          {errorMessage && <div role="alert" className="mb-6 rounded-lg border border-red-300 bg-red-50 p-4 text-sm font-medium text-red-800">{errorMessage}</div>}
+          <p className="mb-7 text-sm text-gray-600">Los campos marcados con <span className="text-orange-500">*</span> son obligatorios.</p>
 
-          <h1 className="mb-6 mt-3 text-center text-2xl font-bold text-black">
-            ALTA NUEVO CLIENTE
-          </h1>
+          <section className="mb-8 space-y-5">
+            <Seccion>Visita y lead</Seccion>
+            <Campo label="Fecha de visita" name="fechaVisita" type="date" value={formData.fechaVisita} onChange={handleChange} required disabled={ocupado} />
+            <Campo label="Nombre y Apellido" name="nombreApellido" type="text" value={formData.nombreApellido} onChange={handleChange} required disabled={ocupado} maxLength={120} autoComplete="name" placeholder="Nombre completo" />
+          </section>
 
-          {successData && (
-            <div
-              role="status"
-              className="mb-5 w-full max-w-md rounded-xl border border-green-300 bg-green-50 p-4 text-left"
-            >
-              <h2 className="mb-2 font-bold text-green-800">
-                Solicitud registrada
-              </h2>
+          <section className="mb-8 space-y-5">
+            <Seccion>Datos de contacto</Seccion>
+            <Campo label="Email" name="email" type="email" inputMode="email" value={formData.email} onChange={handleChange} required disabled={ocupado} maxLength={120} autoComplete="email" placeholder="correo@ejemplo.com" />
+            <Campo label="Teléfono" name="telefono" type="tel" inputMode="tel" value={formData.telefono} onChange={handleChange} required disabled={ocupado} maxLength={14} autoComplete="tel" placeholder="+54-3511234567" />
+          </section>
 
-              <p className="text-sm text-green-900">{successData.message}</p>
+          <section className="mb-8 space-y-5">
+            <Seccion>Domicilio</Seccion>
+            <Campo label="Calle" name="calle" type="text" value={formData.calle} onChange={handleChange} required disabled={ocupado} maxLength={120} placeholder="Nombre de la calle" />
+            <Campo label="Nro." name="numero" type="text" value={formData.numero} onChange={handleChange} required disabled={ocupado} maxLength={15} placeholder="Número / S/N" />
+            <Campo label="Barrio o Localidad" name="barrio" type="text" value={formData.barrio} onChange={handleChange} required disabled={ocupado} maxLength={120} placeholder="Barrio, comuna o localidad" />
+            <Campo label="Observaciones de domicilio" name="observacionesDomicilio" value={formData.observacionesDomicilio} onChange={handleChange} textarea disabled={ocupado} maxLength={1500} placeholder="Referencias para encontrar el domicilio" />
+            <Campo label="URL de ubicación (Google Maps)" name="urlUbicacion" type="url" inputMode="url" value={formData.urlUbicacion} onChange={handleChange} disabled={ocupado} maxLength={900} placeholder="https://maps.app.goo.gl/..." />
+          </section>
 
-              {successData.solicitudId && (
-                <p className="mt-2 text-sm font-semibold text-green-900">
-                  ID: {successData.solicitudId}
-                </p>
-              )}
-
-              <div className="mt-4 space-y-3">
-                {successData.whatsappUrl && (
-                  <a
-                    href={successData.whatsappUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex min-h-12 w-full items-center justify-center rounded-lg bg-green-600 px-5 py-3 text-center font-bold text-white transition active:scale-[0.99]"
-                  >
-                    Abrir WhatsApp
-                  </a>
-                )}
-
-                {successData.pdfUrl && (
-                  <a
-                    href={successData.pdfUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex min-h-12 w-full items-center justify-center rounded-lg border-2 border-blue-900 bg-white px-5 py-3 text-center font-bold text-blue-900"
-                  >
-                    Ver PDF en Drive
-                  </a>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => setSuccessData(null)}
-                  className="min-h-11 w-full text-sm font-semibold text-blue-900 underline"
-                >
-                  Cerrar mensaje
-                </button>
-              </div>
-            </div>
-          )}
-
-          <form
-            className="w-full max-w-md rounded-2xl border border-gray-200 bg-white px-4 py-6 text-left shadow-sm"
-            onSubmit={handleEnviar}
-            noValidate
-          >
-            {errorMessage && (
-              <div
-                role="alert"
-                className="mb-6 rounded-lg border border-red-300 bg-red-50 p-4 text-sm font-medium text-red-800"
-              >
-                {errorMessage}
-              </div>
+          <section className="mb-8 space-y-5">
+            <Seccion>Servicio de interés</Seccion>
+            <Campo label="Servicio" name="servicio" value={formData.servicio} onChange={handleChange} options={SERVICIOS} required disabled={ocupado} />
+            <Campo label="Importe presupuestado (si corresponde)" name="presupuesto" type="text" inputMode="decimal" value={formData.presupuesto} onChange={handleChange} disabled={ocupado} maxLength={20} placeholder="Ej.: 1500000,50 (sin puntos de miles)" />
+            {formData.presupuesto.trim() !== "" && (
+              <>
+                <Campo label="Moneda" name="moneda" value={formData.moneda} onChange={handleChange} options={MONEDA} required disabled={ocupado} />
+                <Campo label="Fecha de presupuesto" name="fechaPresupuesto" type="date" value={formData.fechaPresupuesto} onChange={handleChange} required disabled={ocupado} />
+              </>
             )}
+            <Campo label="Observaciones del servicio" name="observacionesServicio" value={formData.observacionesServicio} onChange={handleChange} textarea disabled={ocupado} maxLength={1500} placeholder="Necesidades, potencia, equipamiento, observaciones comerciales..." />
+          </section>
 
-            <p className="mb-7 text-sm text-gray-600">
-              Los campos marcados con{" "}
-              <span className="font-bold text-orange-500">*</span> son
-              obligatorios.
-            </p>
+          <section className="mb-8 space-y-5">
+            <Seccion>Vendedor</Seccion>
+            <Campo label="Nombre del vendedor" name="vendedor" type="text" value={formData.vendedor} onChange={handleChange} required disabled={ocupado} maxLength={120} placeholder="Nombre y apellido" />
+          </section>
 
-            <section className="mb-8">
-              <SectionTitle>Datos del cliente</SectionTitle>
-
-              <div className="space-y-5">
-                <div>
-                  <FieldLabel htmlFor="nombreApellido" required>
-                    Nombre y Apellido
-                  </FieldLabel>
-
-                  <input
-                    type="text"
-                    id="nombreApellido"
-                    name="nombreApellido"
-                    value={formData.nombreApellido}
-                    onChange={handleChange}
-                    autoComplete="name"
-                    required
-                    maxLength={100}
-                    disabled={isSubmitting}
-                    placeholder="Ingrese nombre y apellido"
-                    className={INPUT_CLASS_NAME}
-                  />
-                </div>
-
-                <div>
-                  <FieldLabel htmlFor="dni" required>
-                    DNI
-                  </FieldLabel>
-
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    id="dni"
-                    name="dni"
-                    value={formData.dni}
-                    onChange={handleChange}
-                    pattern="[0-9]{7,8}"
-                    minLength={7}
-                    maxLength={8}
-                    required
-                    disabled={isSubmitting}
-                    placeholder="Ingrese 7 u 8 dígitos"
-                    className={INPUT_CLASS_NAME}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className="mb-8">
-              <SectionTitle>Datos de contacto</SectionTitle>
-
-              <div className="space-y-5">
-                <div>
-                  <FieldLabel htmlFor="email" required>
-                    Email
-                  </FieldLabel>
-
-                  <input
-                    type="email"
-                    inputMode="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    autoComplete="email"
-                    maxLength={120}
-                    required
-                    disabled={isSubmitting}
-                    placeholder="correo@ejemplo.com"
-                    className={INPUT_CLASS_NAME}
-                  />
-                </div>
-
-                <div>
-                  <FieldLabel htmlFor="telefono" required>
-                    Teléfono
-                  </FieldLabel>
-
-                  <input
-                    type="tel"
-                    inputMode="tel"
-                    id="telefono"
-                    name="telefono"
-                    value={formData.telefono}
-                    onChange={handleChange}
-                    autoComplete="tel"
-                    minLength={7}
-                    maxLength={14}
-                    pattern="[0-9+\-() ]{7,14}"
-                    required
-                    disabled={isSubmitting}
-                    placeholder="+54-3511234567"
-                    className={INPUT_CLASS_NAME}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className="mb-8">
-              <SectionTitle>Domicilio</SectionTitle>
-
-              <div className="space-y-5">
-                <div>
-                  <FieldLabel htmlFor="calle" required>
-                    Calle
-                  </FieldLabel>
-
-                  <input
-                    type="text"
-                    id="calle"
-                    name="calle"
-                    value={formData.calle}
-                    onChange={handleChange}
-                    maxLength={100}
-                    required
-                    disabled={isSubmitting}
-                    placeholder="Nombre de la calle"
-                    className={INPUT_CLASS_NAME}
-                  />
-                </div>
-
-                <div>
-                  <FieldLabel htmlFor="numero" required>
-                    Nro.
-                  </FieldLabel>
-
-                  <input
-                    type="text"
-                    id="numero"
-                    name="numero"
-                    value={formData.numero}
-                    onChange={handleChange}
-                    maxLength={10}
-                    required
-                    disabled={isSubmitting}
-                    placeholder="Número del domicilio"
-                    className={INPUT_CLASS_NAME}
-                  />
-                </div>
-
-                <div>
-                  <FieldLabel htmlFor="barrio" required>
-                    Barrio
-                  </FieldLabel>
-
-                  <input
-                    type="text"
-                    id="barrio"
-                    name="barrio"
-                    value={formData.barrio}
-                    onChange={handleChange}
-                    maxLength={100}
-                    required
-                    disabled={isSubmitting}
-                    placeholder="Ingrese el barrio"
-                    className={INPUT_CLASS_NAME}
-                  />
-                </div>
-
-                <div>
-                  <FieldLabel htmlFor="observacionesDomicilio">
-                    Observaciones
-                  </FieldLabel>
-
-                  <textarea
-                    id="observacionesDomicilio"
-                    name="observacionesDomicilio"
-                    value={formData.observacionesDomicilio}
-                    onChange={handleChange}
-                    rows={4}
-                    maxLength={500}
-                    disabled={isSubmitting}
-                    placeholder="Entre calles, referencias, piso, departamento, etc."
-                    className={TEXTAREA_CLASS_NAME}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className="mb-8">
-              <SectionTitle>Servicio de Internet</SectionTitle>
-
-              <div className="space-y-5">
-                <div>
-                  <FieldLabel htmlFor="empresaActual">
-                    Empresa actual
-                  </FieldLabel>
-
-                  <input
-                    type="text"
-                    id="empresaActual"
-                    name="empresaActual"
-                    value={formData.empresaActual}
-                    onChange={handleChange}
-                    maxLength={100}
-                    disabled={isSubmitting}
-                    placeholder="Empresa actual, si corresponde"
-                    className={INPUT_CLASS_NAME}
-                  />
-                </div>
-
-                <div>
-                  <FieldLabel htmlFor="planSolicitado" required>
-                    Plan solicitado
-                  </FieldLabel>
-
-                  <select
-                    id="planSolicitado"
-                    name="planSolicitado"
-                    value={formData.planSolicitado}
-                    onChange={handleChange}
-                    required
-                    disabled={isSubmitting}
-                    className={INPUT_CLASS_NAME}
-                  >
-                    <option value="">Seleccione un plan</option>
-
-                    {PLANES.map((plan) => (
-                      <option key={plan} value={plan}>
-                        {plan}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <FieldLabel htmlFor="medioPago" required>
-                    Medio de pago
-                  </FieldLabel>
-
-                  <select
-                    id="medioPago"
-                    name="medioPago"
-                    value={formData.medioPago}
-                    onChange={handleChange}
-                    required
-                    disabled={isSubmitting}
-                    className={INPUT_CLASS_NAME}
-                  >
-                    <option value="">Seleccione un medio de pago</option>
-
-                    {MEDIOS_PAGO.map((medio) => (
-                      <option key={medio} value={medio}>
-                        {medio}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <FieldLabel htmlFor="promocion">
-                    Promoción o descuento
-                  </FieldLabel>
-
-                  <input
-                    type="text"
-                    id="promocion"
-                    name="promocion"
-                    value={formData.promocion}
-                    onChange={handleChange}
-                    maxLength={150}
-                    disabled={isSubmitting}
-                    placeholder="Promoción aplicada, si corresponde"
-                    className={INPUT_CLASS_NAME}
-                  />
-                </div>
-
-                <div>
-                  <FieldLabel htmlFor="observacionesPlan">
-                    Observaciones
-                  </FieldLabel>
-
-                  <textarea
-                    id="observacionesPlan"
-                    name="observacionesPlan"
-                    value={formData.observacionesPlan}
-                    onChange={handleChange}
-                    rows={4}
-                    maxLength={500}
-                    disabled={isSubmitting}
-                    placeholder="Detalles adicionales sobre el servicio"
-                    className={TEXTAREA_CLASS_NAME}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <section className="mb-8">
-              <SectionTitle>Visita y asignaciones</SectionTitle>
-
-              <div className="space-y-5">
-                <div>
-                  <FieldLabel htmlFor="fechaVisita" required>
-                    Fecha tentativa de visita
-                  </FieldLabel>
-
-                  <input
-                    type="date"
-                    id="fechaVisita"
-                    name="fechaVisita"
-                    value={formData.fechaVisita}
-                    onChange={handleChange}
-                    min={fechaMinima}
-                    required
-                    disabled={isSubmitting}
-                    className={INPUT_CLASS_NAME}
-                  />
-                </div>
-                <div className="rounded-lg border border-blue-200 bg-blue-50">
-                  <button
-                    type="button"
-                    onClick={() => setShowTechnicianInfo((current) => !current)}
-                    className="flex min-h-12 w-full items-center justify-between px-4 py-3 text-left"
-                  >
-                    <span className="text-sm font-semibold text-blue-900">
-                      Ver servicios y zonas de los técnicos
-                    </span>
-
-                    <span
-                      className={`text-lg text-blue-900 transition-transform ${
-                        showTechnicianInfo ? "rotate-180" : ""
-                      }`}
-                      aria-hidden="true"
-                    >
-                      ▾
-                    </span>
-                  </button>
-
-                  {showTechnicianInfo && (
-                    <div className="max-h-72 space-y-3 overflow-y-auto border-t border-blue-200 p-3">
-                      {TECNICOS_INFO.map((tecnico) => (
-                        <div
-                          key={tecnico.nombre}
-                          className="rounded-lg bg-white p-3 shadow-sm"
-                        >
-                          <h3 className="text-sm font-bold text-blue-900">
-                            {tecnico.nombre}
-                          </h3>
-
-                          <p className="mt-1 text-xs font-semibold text-orange-600">
-                            {tecnico.servicios.join(" · ")}
-                          </p>
-
-                          <p className="mt-2 text-xs leading-5 text-gray-700">
-                            {tecnico.zonas.join(" · ")}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <FieldLabel htmlFor="tecnicoAsignado" required>
-                    Técnico asignado
-                  </FieldLabel>
-
-                  <select
-                    id="tecnicoAsignado"
-                    name="tecnicoAsignado"
-                    value={formData.tecnicoAsignado}
-                    onChange={handleChange}
-                    required
-                    disabled={isSubmitting}
-                    className={INPUT_CLASS_NAME}
-                  >
-                    <option value="">Seleccione un técnico</option>
-
-                    {TECNICOS.map((tecnico) => (
-                      <option key={tecnico} value={tecnico}>
-                        {tecnico}
-                      </option>
-                    ))}
-
-                    <option value="Otro">Otro</option>
-                  </select>
-                </div>
-                {tecnicoSeleccionadoInfo && (
-                  <div className="mt-3 rounded-lg border border-green-200 bg-green-50 p-3">
-                    <p className="text-sm font-bold text-green-900">
-                      {tecnicoSeleccionadoInfo.nombre}
-                    </p>
-
-                    <p className="mt-1 text-xs font-semibold text-green-800">
-                      Servicios: {tecnicoSeleccionadoInfo.servicios.join(", ")}
-                    </p>
-
-                    <p className="mt-1 text-xs leading-5 text-gray-700">
-                      Zonas: {tecnicoSeleccionadoInfo.zonas.join(", ")}
-                    </p>
-                  </div>
-                )}
-
-                {formData.tecnicoAsignado === "Otro" && (
-                  <div>
-                    <FieldLabel htmlFor="otroTecnico" required>
-                      Nombre del técnico
-                    </FieldLabel>
-
-                    <input
-                      type="text"
-                      id="otroTecnico"
-                      name="otroTecnico"
-                      value={formData.otroTecnico}
-                      onChange={handleChange}
-                      maxLength={100}
-                      required
-                      disabled={isSubmitting}
-                      placeholder="Ingrese el nombre del técnico"
-                      className={INPUT_CLASS_NAME}
-                    />
-                  </div>
-                )}
-
-                <div>
-                  <FieldLabel htmlFor="vendedor" required>
-                    Vendedor
-                  </FieldLabel>
-
-                  <input
-                    type="text"
-                    id="vendedor"
-                    name="vendedor"
-                    value={formData.vendedor}
-                    onChange={handleChange}
-                    maxLength={100}
-                    required
-                    disabled={isSubmitting}
-                    placeholder="Nombre del vendedor"
-                    className={INPUT_CLASS_NAME}
-                  />
-                </div>
-              </div>
-            </section>
-
-            <div className="space-y-3 border-t border-gray-200 pt-6">
-              <button
-                type="submit"
-                disabled={isSubmitting || isGeneratingPdf}
-                className="min-h-12 w-full rounded-lg bg-orange-500 px-6 py-3 text-base font-bold text-white transition active:scale-[0.99] active:bg-orange-600 disabled:cursor-not-allowed disabled:bg-orange-300"
-              >
-                {isSubmitting ? "ENVIANDO..." : "ENVIAR"}
-              </button>
-
-              <button
-                type="button"
-                onClick={generarPdfLocal}
-                disabled={isSubmitting || isGeneratingPdf}
-                className="min-h-12 w-full rounded-lg border-2 border-blue-900 bg-white px-6 py-3 text-base font-bold text-blue-900 transition active:scale-[0.99] active:bg-blue-50 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400"
-              >
-                {isGeneratingPdf ? "GENERANDO PDF..." : "DESCARGAR PDF"}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleLimpiar}
-                disabled={isSubmitting || isGeneratingPdf}
-                className="min-h-12 w-full rounded-lg border border-gray-400 bg-white px-6 py-3 text-base font-bold text-gray-700 transition active:scale-[0.99] active:bg-gray-100 disabled:cursor-not-allowed disabled:text-gray-400"
-              >
-                LIMPIAR
-              </button>
-            </div>
-          </form>
-
-          <footer className="mt-6 flex flex-col items-center justify-center p-3">
-            <h4 className="mb-0 text-sm text-black">Diseño y desarrollo:</h4>
-
-            <a
-              href="https://www.boostup-marketingdigital.com/"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Visitar sitio web de BoostUp"
-            >
-              <img
-                src={Boostup}
-                alt="BoostUp Logo"
-                className="h-auto w-20 object-contain"
-              />
-            </a>
-          </footer>
-        </main>
-      </div>
+          <div className="space-y-3 border-t border-gray-200 pt-6">
+            <button type="submit" disabled={ocupado} className="min-h-12 w-full rounded-lg bg-orange-500 px-6 py-3 text-base font-bold text-white transition active:bg-orange-600 disabled:opacity-50">
+              {isSubmitting ? "ENVIANDO..." : "ENVIAR"}
+            </button>
+            <button type="button" disabled={ocupado} onClick={handleDescargarPdf} className="min-h-12 w-full rounded-lg border-2 border-blue-900 bg-white px-6 py-3 text-base font-bold text-blue-900 disabled:opacity-50">
+              {isGeneratingPdf ? "GENERANDO PDF..." : "DESCARGAR PDF"}
+            </button>
+            <button type="button" disabled={ocupado} onClick={handleLimpiar} className="min-h-12 w-full rounded-lg border border-gray-400 bg-white px-6 py-3 text-base font-semibold text-gray-700 disabled:opacity-50">LIMPIAR</button>
+          </div>
+        </form>
+        <footer className="mt-6 flex flex-col items-center gap-2 text-sm text-black">
+          <span>Diseño y desarrollo:</span>
+          <a href="https://www.boostup-marketingdigital.com/" target="_blank" rel="noreferrer"><img src={Boostup} alt="BoostUp" className="h-auto w-20 object-contain" /></a>
+        </footer>
+      </main>
 
       {showClearWarning && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="clear-warning-title"
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4" role="dialog" aria-modal="true" aria-labelledby="avisoLimpiar">
           <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
-            <h2
-              id="clear-warning-title"
-              className="mb-3 text-lg font-bold text-blue-900"
-            >
-              Datos no guardados
-            </h2>
-
-            <p className="text-sm leading-6 text-gray-700">
-              Los datos de esta solicitud todavía no fueron enviados ni
-              descargados.
-            </p>
-
-            <p className="mt-3 text-sm font-semibold leading-6 text-gray-800">
-              Si limpiás el formulario, la información se perderá. ¿Deseás
-              continuar?
-            </p>
-
-            <div className="mt-6 space-y-3">
-              <button
-                type="button"
-                onClick={() => setShowClearWarning(false)}
-                className="min-h-12 w-full rounded-lg bg-blue-900 px-5 py-3 font-bold text-white"
-              >
-                CANCELAR
-              </button>
-
-              <button
-                type="button"
-                onClick={handleConfirmarLimpieza}
-                className="min-h-12 w-full rounded-lg border-2 border-red-600 bg-white px-5 py-3 font-bold text-red-600"
-              >
-                LIMPIAR DE TODOS MODOS
-              </button>
-            </div>
+            <h2 id="avisoLimpiar" className="text-lg font-bold text-blue-900">Los datos todavía no fueron guardados</h2>
+            <p className="mt-3 text-sm leading-6 text-gray-700">No se enviaron a Sheets ni se descargó un PDF de la versión actual. Si limpiás, perderás la información.</p>
+            <button type="button" onClick={() => setShowClearWarning(false)} className="mt-5 min-h-12 w-full rounded-lg bg-blue-900 font-semibold text-white">CANCELAR</button>
+            <button type="button" onClick={resetForm} className="mt-3 min-h-12 w-full rounded-lg border border-red-600 bg-white font-semibold text-red-600">LIMPIAR DE TODOS MODOS</button>
           </div>
         </div>
       )}
-    </React.Fragment>
+    </div>
   );
-};
-
-export default SolenarVentas;
+}
