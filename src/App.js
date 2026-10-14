@@ -49,7 +49,7 @@ const App = () => {
 
        <Route
         //Garbo enlaces
-        path="/solenar-ventas"
+        path="/solenar-leads"
         element={<SolenarVentas />}
       />
 

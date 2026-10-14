@@ -248,7 +248,7 @@ export default function SolenarVentas() {
   const ocupado = isSubmitting || isGeneratingPdf;
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-gray-50">
-      <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col items-center px-3 py-6">
+      <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col items-center px-3 py-6 rounded-full">
         <img src={Logo} alt="Logo Solenar" className="h-auto w-36 object-contain" />
         <h1 className="mb-5 mt-3 text-center text-2xl font-bold text-black">REGISTRO DE LEADS</h1>
         {successData && (
